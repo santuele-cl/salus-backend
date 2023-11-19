@@ -4,18 +4,15 @@ import {
   createNewUser,
   updateUser,
   deleteUser,
-} from "../controllers/user.controller.js";
-import verifyJWT from "../middlewares/verifyJWT.middleware.js";
-import { verifyRole } from "../middlewares/verifyRole.middleware.js";
-
+} from "./test.controller.js";
 const router = Router();
 
-router.use(verifyJWT);
 router
   .route("/")
   .get(getAllUsers)
   .post(createNewUser) // Admin and manager only verifyRole(["admin", "manager"]),
   .patch(updateUser)
-  .delete(verifyRole(["admin", "manager"]), deleteUser); // Admin and manager only
+  .delete(deleteUser);
+//   .delete(verifyRole(["admin", "manager"]), deleteUser); // Admin and manager only
 
 export default router;

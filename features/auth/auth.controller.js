@@ -2,9 +2,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 
-import User from "../models/user.model.js";
+import prismaInstance from "../../prisma/prismaClient.js";
 
-const ACCESS_TOKEN_VALIDITY = "15m";
+const ACCESS_TOKEN_VALIDITY = "15s";
 const REFRESH_TOKEN_VALIDITY = "1d";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
@@ -20,10 +20,13 @@ const login = asyncHandler(async (req, res) => {
   }
 
   // @func  Find and validate user
-  const user = await User.findOne({ username }).lean().exec();
+  const user = await prismaInstance.user.findUnique({
+    where: { username },
+    select: { username: true, password: true, isActive: true, role: true },
+  });
 
-  if (!user || !user.active) {
-    return res.status(401).json({ message: "Unauthorized." });
+  if (!user || !user.isActive) {
+    return res.status(401).json({ message: "Credentials does not exist." });
   }
 
   // @func  Compare and validate password
@@ -38,7 +41,7 @@ const login = asyncHandler(async (req, res) => {
     {
       UserData: {
         username: user.username,
-        roles: user.roles,
+        roles: user.role.roleName,
       },
     },
     process.env.ACCESS_TOKEN_SECRET,
@@ -67,7 +70,7 @@ const login = asyncHandler(async (req, res) => {
 // @access  Public
 const refresh = (req, res) => {
   const { cookies } = req;
-  console.log(cookies?.refreshToken);
+
   if (!cookies?.refreshToken) {
     return res.status(401).json({ message: "Unauthorized." });
   }
@@ -82,16 +85,17 @@ const refresh = (req, res) => {
           .json({ message: `Unauthorized. ${err?.message}` });
 
       // @func    Validate user
-      const user = await User.findOne({ username: decoded.username })
-        .lean()
-        .exec();
+      const user = await prismaInstance.user.findUnique({
+        where: { username: decoded.username },
+        select: { username: true, role: true },
+      });
 
       // @func  Create tokens
       const accessToken = jwt.sign(
         {
           UserData: {
             username: user.username,
-            roles: user.roles,
+            roles: user.role.roleName,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
@@ -119,9 +123,5 @@ const logout = (req, res) => {
 
   res.json({ message: "Cookie cleared." });
 };
-
-// @desc    Login
-// @route   POST /auth
-// @access  Public
 
 export { login, refresh, logout };

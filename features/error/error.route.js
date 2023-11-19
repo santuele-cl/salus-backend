@@ -11,7 +11,7 @@ const router = Router();
 router.all("/", (req, res) => {
   res.status(404);
   if (req.accepts("html")) {
-    res.sendFile(join(__dirname, "..", "views", "error.html"));
+    res.sendFile(join(__dirname, "error.html"));
   } else if (req.accepts("json")) {
     res.json({ error: "404 Not Found." });
   } else {

@@ -9,7 +9,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = Router();
 
 router.get("^/$|/index(.html)?", (req, res) => {
-  res.sendFile(join(__dirname, "..", "views", "index.html"));
+  res.sendFile(join(__dirname, "index.html"));
 });
 
 export default router;

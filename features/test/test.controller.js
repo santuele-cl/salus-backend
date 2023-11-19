@@ -1,0 +1,119 @@
+import asyncHandler from "express-async-handler";
+import bcrypt from "bcrypt";
+
+import prismaInstance from "../../prisma/prismaClient.js";
+
+// @desc    Get all users
+// @route   GET /users
+// @access  Private
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await prismaInstance.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!users?.length) {
+    return res.status(400).json({ message: "No users found." });
+  }
+
+  res.status(200).json(users);
+});
+
+// @desc    Create new user
+// @route   POST /users
+// @access  Private
+const createNewUser = asyncHandler(async (req, res) => {
+  const { username, password, roleId } = req.body;
+
+  // @func  Confirm request data
+  if (!username || !password || !roleId) {
+    const errMessage = [];
+    if (!username) errMessage.push("Username is missing.");
+    if (!password) errMessage.push("Password is missing.");
+    if (!roleId) errMessage.push("Role ID is missing.");
+
+    return res.status(400).json({ message: errMessage.join(" ") });
+  }
+
+  // @func  Check for duplicate
+  const duplicate = await prismaInstance.user.findUnique({
+    where: { username },
+  });
+
+  if (duplicate) {
+    return res.status(409).json({ message: "Username already taken." });
+  }
+
+  // @func  Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // @func  Create and store new user
+  const user = await prismaInstance.user.create({
+    data: { username, password: hashedPassword, roleId },
+  });
+
+  if (user) {
+    res.status(201).json({ message: "User created successfully." });
+  } else {
+    res.status(400).json({ message: "Invalid user data received." });
+  }
+});
+
+// @desc    Update a user
+// @route   PATCH /users/:id
+// @access  Private
+const updateUser = asyncHandler(async (req, res) => {
+  const { id, username } = req.body;
+
+  // @func  Check if user exist
+  const user = await prismaInstance.user.findUnique({ where: { id } });
+  if (!user) {
+    return res.status(404).json({ message: "User not found." });
+  }
+
+  const updatedUser = await prismaInstance.user.update({
+    where: { id: id },
+    data: { username: username },
+  });
+
+  res.json({ message: `${updatedUser.username} updated.` });
+});
+
+// // @desc    Delete a user
+// // @route   Delete /users/:id
+// // @access  Private
+const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: "User ID missing." });
+  }
+
+  //   // @func  Abort delete if user note(s) exist
+  //   const  = await prismaInstance.user.delete({ where: { id } });
+
+  //   if (note) {
+  //     return res.status(400).json({ message: "User has assigned note(s)." });
+  //   }
+
+  // @func  Check if user exist
+  const user = await prismaInstance.user.findUnique({ where: { id } });
+  if (!user) {
+    return res.status(400).json({ message: "User not found." });
+  }
+
+  // @func  Delete
+
+  const deleteUser = await prismaInstance.user.delete({ where: { id } });
+  const message = `Username ${deleteUser.username} with ID ${deleteUser.id} deleted.`;
+
+  res.status(200).json({ message });
+});
+
+export { getAllUsers, createNewUser, updateUser, deleteUser };

@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  isActive  Boolean  @default(true)
+  username  String   @unique
+  password  String
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // medicalRecordId
+  // personalInformationId
+  // personalInfo PersonalInformation[]
+  // emergencyContact EmergenyContact[]
+  // medicalRecord MedicalRecord[]
+}
+
+// model PersonalInformation {
+//   personalInformationId String   @id @default(uuid())
+//   user User @relation(fields: [userId], references: [id])
+//   userId String
+//   fname                 String
+//   mname                 String
+//   lname                 String
+//   nameSuffix            String?
+//   bdate                 DateTime
+//   age                   Int
+//   contactNumber         Int
+//   email                 String?
+//   currentAddress        String
+//   permanentAddress      String
+//   fathersName           String
+//   fathersOccupation     String
+//   fathersContactNum     String
+//   mothersMaideName      String
+//   mothersOccupation     String
+//   mothersContactNum     String
+//   createdAt             DateTime @default(now())
+//   updatedAt             DateTime @updatedAt
+// }
+
+// model EmergenyContact {
+//   user User @relation(fields: [userId], references: [id])
+//   userId String
+//   emergencyContactId           String  @id @default(uuid())
+//   emergencyContactName         String
+//   emergencyContactRelationship String
+//   emergencyContactAddress      String
+//   emergencyContactPhoneNum     Int
+//   emergencyContactEmail        String?
+// }
+
+// model MedicalRecord {
+//   user User @relation(fields: [userId], references: [id])
+//   userId String
+//   medicalRecorId String   @id @default(uuid())
+//   height         Int
+//   weight         Int
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @updatedAt
+// }
+
+// model UserRole {
+//   id     String @id @default(uuid())
+//   role   Role   @relation(fields: [roleId], references: [id])
+//   roleId String
+//   user   User   @relation(fields: [userId], references: [id])
+//   userId String
+// }
+
+model Role {
+  id       String @id @default(uuid())
+  roleName String @unique
+  users User[]
+  // user User @relation(fields: [userId], references: [id])
+  // userId String @unique
+  // userRoles UserRole[]
+}
