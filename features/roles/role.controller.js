@@ -6,7 +6,14 @@ import prismaInstance from "../../prisma/prismaClient.js";
 // @route   GET /roles
 // @access  Private
 const getRoles = asyncHandler(async (req, res) => {
-  const roles = await prismaInstance.role.findMany();
+  // const { skip, take } = req.query;
+  const roles = await prismaInstance.role
+    .findMany
+    //   {
+    //   skip: parseInt(skip),
+    //   take: parseInt(take),
+    // }
+    ();
 
   if (!roles?.length) {
     return res.status(400).json({ message: "No roles found." });
@@ -49,7 +56,8 @@ const postRole = asyncHandler(async (req, res) => {
 // @route   PATCH /roles/:id
 // @access  Private
 const updateRole = asyncHandler(async (req, res) => {
-  const { id, roleName } = req.body;
+  const { roleId: id, roleName } = req.body;
+  console.log(req.body);
 
   //   // Verify Role by Id
   const role = await prismaInstance.role.findUnique({ where: { id } });

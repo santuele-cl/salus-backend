@@ -26,14 +26,14 @@ const login = asyncHandler(async (req, res) => {
   });
 
   if (!user || !user.isActive) {
-    return res.status(401).json({ message: "Credentials does not exist." });
+    return res.status(401).json({ message: "Incorrect Username or Password." });
   }
 
   // @func  Compare and validate password
   const match = await bcrypt.compare(password, user.password);
 
   if (!match) {
-    return res.status(401).json({ message: "Unauthorized" });
+    return res.status(401).json({ message: "Incorrect Username or Password." });
   }
 
   // @func  Create tokens

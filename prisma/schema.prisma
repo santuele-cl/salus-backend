@@ -28,7 +28,7 @@ model User {
 }
 
 // model PersonalInformation {
-//   personalInformationId String   @id @default(uuid())
+//   id String   @id @default(uuid())
 //   user User @relation(fields: [userId], references: [id])
 //   userId String
 //   fname                 String
@@ -54,7 +54,7 @@ model User {
 // model EmergenyContact {
 //   user User @relation(fields: [userId], references: [id])
 //   userId String
-//   emergencyContactId           String  @id @default(uuid())
+//   id          String  @id @default(uuid())
 //   emergencyContactName         String
 //   emergencyContactRelationship String
 //   emergencyContactAddress      String
@@ -65,7 +65,7 @@ model User {
 // model MedicalRecord {
 //   user User @relation(fields: [userId], references: [id])
 //   userId String
-//   medicalRecorId String   @id @default(uuid())
+//   id String   @id @default(uuid())
 //   height         Int
 //   weight         Int
 //   createdAt      DateTime @default(now())
