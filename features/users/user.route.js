@@ -20,4 +20,17 @@ router
   .patch(verifyRole(["admin"]), updateUser)
   .delete(verifyRole(["admin"]), deleteUser); // Admin and manager only
 
+router
+  .route("/:userId")
+  .get(verifyRole(["admin"]), getUsers)
+  .put()
+  .delete();
 export default router;
+
+/**
+ * GET /users
+ * GET /users/:userId
+ * POST /users
+ * PUT /users/:userId
+ * DELETE /users/:userId
+ */
