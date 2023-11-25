@@ -4,7 +4,7 @@ import asyncHandler from "express-async-handler";
 
 import prismaInstance from "../../prisma/prismaClient.js";
 
-const ACCESS_TOKEN_VALIDITY = "15s";
+const ACCESS_TOKEN_VALIDITY = "15m";
 const REFRESH_TOKEN_VALIDITY = "1d";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 

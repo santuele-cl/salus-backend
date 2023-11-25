@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import {
-  getAllUsers,
+  getUsers,
   createNewUser,
   updateUser,
   deleteUser,
@@ -15,7 +15,7 @@ const router = Router();
 router.use(verifyJWT);
 router
   .route("/")
-  .get(verifyRole(["admin"]), getAllUsers)
+  .get(verifyRole(["admin"]), getUsers)
   .post(verifyRole(["admin"]), createNewUser) // Admin and manager only verifyRole(["admin", "manager"]),
   .patch(verifyRole(["admin"]), updateUser)
   .delete(verifyRole(["admin"]), deleteUser); // Admin and manager only
