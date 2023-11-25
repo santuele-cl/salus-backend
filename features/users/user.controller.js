@@ -13,60 +13,7 @@ import prismaInstance from "../../prisma/prismaClient.js";
 // @route   GET /users
 // @access  Private
 const getUsers = asyncHandler(async (req, res) => {
-  if (req.query.username) {
-    const { username } = req.query;
-
-    if (!username) {
-      return res.status(400).json({ message: "User not found." });
-    }
-
-    const user = await prismaInstance.user.findUnique({
-      where: { username },
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    res.status(200).json(user);
-  } else {
-    const users = await prismaInstance.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!users?.length) {
-      return res.status(400).json({ message: "No users found." });
-    }
-
-    res.status(200).json(users);
-  }
-});
-
-// @desc    Get all users
-// @route   GET /users/:username
-// @access  Private
-const getUser = asyncHandler(async (req, res) => {
-  const { username } = req.query;
-
-  console.log(username);
-
-  if (!username) {
-    return res.status(400).json({ message: "User not found." });
-  }
-
-  const user = await prismaInstance.user.findUnique({
-    where: { username },
+  const users = await prismaInstance.user.findMany({
     select: {
       id: true,
       username: true,
@@ -76,6 +23,39 @@ const getUser = asyncHandler(async (req, res) => {
       updatedAt: true,
     },
   });
+
+  if (!users?.length) {
+    return res.status(400).json({ message: "No users found." });
+  }
+
+  res.status(200).json(users);
+});
+
+// @desc    Get a user by ID
+// @route   GET /users/:id
+// @access  Private
+const getUserById = asyncHandler(async (req, res) => {
+  const { userId: id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ message: "User not found." });
+  }
+
+  const user = await prismaInstance.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      username: true,
+      role: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user) {
+    return res.status(400).json({ message: "User not found." });
+  }
 
   res.status(200).json(user);
 });
@@ -150,13 +130,6 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User ID missing." });
   }
 
-  //   // @func  Abort delete if user note(s) exist
-  //   const  = await prismaInstance.user.delete({ where: { id } });
-
-  //   if (note) {
-  //     return res.status(400).json({ message: "User has assigned note(s)." });
-  //   }
-
   // @func  Check if user exist
   const user = await prismaInstance.user.findUnique({ where: { id } });
   if (!user) {
@@ -164,11 +137,10 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 
   // @func  Delete
-
   const deleteUser = await prismaInstance.user.delete({ where: { id } });
   const message = `Username ${deleteUser.username} with ID ${deleteUser.id} deleted.`;
 
   res.status(200).json({ message });
 });
 
-export { getUser, getUsers, createNewUser, updateUser, deleteUser };
+export { getUserById, getUsers, createNewUser, updateUser, deleteUser };

@@ -14,6 +14,7 @@ const verifyJWT = (req, res, next) => {
       return res.status(401).json({ message: `Unauthorized.` });
     }
 
+    req.userId = decoded.UserData.userId;
     req.user = decoded.UserData.username;
     req.roles = decoded.UserData.roles;
     next();

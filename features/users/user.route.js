@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import {
+  getUserById,
   getUsers,
   createNewUser,
   updateUser,
@@ -9,6 +10,7 @@ import {
 
 import verifyJWT from "../../middlewares/verifyJWT.middleware.js";
 import { verifyRole } from "../../middlewares/verifyRole.middleware.js";
+import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
 
 const router = Router();
 
@@ -16,21 +18,12 @@ router.use(verifyJWT);
 router
   .route("/")
   .get(verifyRole(["admin"]), getUsers)
-  .post(verifyRole(["admin"]), createNewUser) // Admin and manager only verifyRole(["admin", "manager"]),
-  .patch(verifyRole(["admin"]), updateUser)
-  .delete(verifyRole(["admin"]), deleteUser); // Admin and manager only
+  .post(verifyRole(["admin"]), createNewUser);
 
 router
   .route("/:userId")
-  .get(verifyRole(["admin"]), getUsers)
-  .put()
-  .delete();
-export default router;
+  .get(verifyUserId, getUserById)
+  .patch(verifyRole(["admin"]), updateUser)
+  .delete(verifyRole(["admin"]), deleteUser);
 
-/**
- * GET /users
- * GET /users/:userId
- * POST /users
- * PUT /users/:userId
- * DELETE /users/:userId
- */
+export default router;

@@ -22,7 +22,13 @@ const login = asyncHandler(async (req, res) => {
   // @func  Find and validate user
   const user = await prismaInstance.user.findUnique({
     where: { username },
-    select: { username: true, password: true, isActive: true, role: true },
+    select: {
+      id: true,
+      username: true,
+      password: true,
+      isActive: true,
+      role: true,
+    },
   });
 
   if (!user || !user.isActive) {
@@ -40,6 +46,7 @@ const login = asyncHandler(async (req, res) => {
   const accessToken = jwt.sign(
     {
       UserData: {
+        userId: user.id,
         username: user.username,
         roles: user.role.roleName,
       },
@@ -87,13 +94,13 @@ const refresh = (req, res) => {
       // @func    Validate user
       const user = await prismaInstance.user.findUnique({
         where: { username: decoded.username },
-        select: { username: true, role: true },
+        select: { id: true, username: true, role: true },
       });
-
       // @func  Create tokens
       const accessToken = jwt.sign(
         {
           UserData: {
+            userId: user.id,
             username: user.username,
             roles: user.role.roleName,
           },
