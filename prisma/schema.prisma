@@ -15,17 +15,97 @@ model User {
   isActive  Boolean  @default(true)
   username  String   @unique
   password  String
-  role   Role @relation(fields: [roleId], references: [id])
-  roleId String
+  role      Role     @relation(fields: [roleId], references: [id])
+  roleId    String
+  // profile Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id       String @id @default(uuid())
+  roleName String @unique
+  users    User[]
+}
+
+// =================== TEST ===================
+
+model UserTest {
+  id        String   @id @default(uuid())
+  isActive  Boolean  @default(true)
+  username  String   @unique
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // medicalRecordId
-  // personalInformationId
-  // personalInfo PersonalInformation[]
-  // emergencyContact EmergenyContact[]
-  // medicalRecord MedicalRecord[]
+  role   RoleTest @relation(fields: [roleId], references: [id])
+  roleId String
+
+  profile   ProfileTest @relation(fields: [profileId], references: [id])
+  profileId String      @unique
+
+  appointments AppointmentTest[]
+  insurances   InsuranceTest[]
 }
+
+model InsuranceTest {
+  id            String   @id @default(uuid())
+  insuranceName String
+  user          UserTest @relation(fields: [userId], references: [id])
+  userId        String   @unique
+}
+
+model ProfileTest {
+  id                String    @id @default(uuid())
+  user              UserTest?
+  fname             String
+  mname             String
+  lname             String
+  nameSuffix        String?
+  bdate             DateTime
+  age               Int
+  contactNumber     Int
+  email             String?
+  currentAddress    String
+  permanentAddress  String
+  emergencyContact EmergenyContactTest[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model RoleTest {
+  id        String   @id @default(uuid())
+  roleName  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users UserTest[]
+}
+
+model AppointmentTest {
+  id                String   @id @default(uuid())
+  appointmentStatus String
+  appointmentDate   DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user   UserTest @relation(fields: [userId], references: [id])
+  userId String   @unique
+}
+
+model EmergenyContactTest {
+  id          String  @id @default(uuid())
+  emergencyContactName         String
+  emergencyContactRelationship String
+  emergencyContactAddress      String
+  emergencyContactPhoneNum     Int
+  emergencyContactEmail        String?
+
+  profile ProfileTest @relation(fields: [profileId], references: [id])
+  profileId String
+}
+
+
 
 // model PersonalInformation {
 //   id String   @id @default(uuid())
@@ -80,11 +160,11 @@ model User {
 //   userId String
 // }
 
-model Role {
-  id       String @id @default(uuid())
-  roleName String @unique
-  users User[]
-  // user User @relation(fields: [userId], references: [id])
-  // userId String @unique
-  // userRoles UserRole[]
-}
+// model RoleTest {
+//   id       String @id @default(uuid())
+//   roleName String @unique
+//   users UserTest[]
+//   user User @relation(fields: [userId], references: [id])
+//   userId String @unique
+//   userRoles UserRole[]
+// }
