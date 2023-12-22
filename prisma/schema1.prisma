@@ -11,7 +11,7 @@ datasource db {
 }
 
 
-model User {
+model User { // Admin, Physician, Nurse, Assistant
   id        String   @id @default(uuid())
   isActive  Boolean  @default(true)
   username  String   @unique
@@ -21,16 +21,79 @@ model User {
 
   role      Role     @relation(fields: [roleId], references: [id])
   roleId    String
-  // profile Profile?
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId String      @unique
 }
 
-model Role {
+model Role { // Admin, Physician, Nurse, Assistant
   id       String @id @default(uuid())
   roleName String @unique
   users    User[]
 }
 
+model Profile {
+    id String @id @default(uuid())
+    user User?
+    fname             String
+    mname             String
+    lname             String   
+    nameSuffix        String?
+    bdate             DateTime
+    contactNumber     Int
+    email             String?
+    address    String
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+
+    uniqueProfileId String?
+}
+
+model HealthcareProfessionalProfile {
+    id String @id @default(uuid())
+    licenseNumber String
+    
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =================== TEST ===================
+model UsersTest {
+  id        String   @id @default(uuid())
+  isActive  Boolean  @default(true)
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role   RoleTest @relation(fields: [roleId], references: [id])
+  roleId String
+
+  profile   ProfileTest @relation(fields: [profileId], references: [id])
+  profileId String      @unique
+
+  appointments AppointmentTest[]
+  insurances   InsuranceTest[]
+}
 
 model UserTest {
   id        String   @id @default(uuid())
