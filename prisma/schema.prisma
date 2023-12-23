@@ -10,7 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id        String   @id @default(uuid())
   isActive  Boolean  @default(true)
@@ -19,8 +18,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  role      Role     @relation(fields: [roleId], references: [id])
-  roleId    String
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
   // profile Profile?
 }
 
@@ -58,21 +57,21 @@ model InsuranceTest {
 }
 
 model ProfileTest {
-  id                String    @id @default(uuid())
-  user              UserTest?
-  fname             String
-  mname             String
-  lname             String
-  nameSuffix        String?
-  bdate             DateTime
-  age               Int
-  contactNumber     Int
-  email             String?
-  currentAddress    String
-  permanentAddress  String
+  id               String                @id @default(uuid())
+  user             UserTest?
+  fname            String
+  mname            String
+  lname            String
+  nameSuffix       String?
+  bdate            DateTime
+  age              Int
+  contactNumber    Int
+  email            String?
+  currentAddress   String
+  permanentAddress String
   emergencyContact EmergenyContactTest[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
 }
 
 model RoleTest {
@@ -96,18 +95,16 @@ model AppointmentTest {
 }
 
 model EmergenyContactTest {
-  id          String  @id @default(uuid())
+  id                           String  @id @default(uuid())
   emergencyContactName         String
   emergencyContactRelationship String
   emergencyContactAddress      String
   emergencyContactPhoneNum     Int
   emergencyContactEmail        String?
 
-  profile ProfileTest @relation(fields: [profileId], references: [id])
+  profile   ProfileTest @relation(fields: [profileId], references: [id])
   profileId String
 }
-
-
 
 // model PersonalInformation {
 //   id String   @id @default(uuid())
