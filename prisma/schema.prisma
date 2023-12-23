@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,101 +7,324 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  isActive  Boolean  @default(true)
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  role   Role   @relation(fields: [roleId], references: [id])
-  roleId String
-  // profile Profile?
-}
-
 model Role {
   id       String @id @default(uuid())
   roleName String @unique
   users    User[]
 }
 
-// =================== TEST ===================
+model User {
+  id       String  @id @default(uuid())
+  isActive Boolean @default(true)
+  username String  @unique
+  password String
 
-model UserTest {
-  id        String   @id @default(uuid())
-  isActive  Boolean  @default(true)
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  role   RoleTest @relation(fields: [roleId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
   roleId String
 
-  profile   ProfileTest @relation(fields: [profileId], references: [id])
+  profile   UserProfile @relation(fields: [profileId], references: [id])
   profileId String      @unique
 
-  appointments AppointmentTest[]
-  insurances   InsuranceTest[]
+  vitalSignsChecked VitalSigns[]
+  diagnoses         Diagnosis[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model InsuranceTest {
+model Department {
+  id   String @id @default(uuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserProfile {
   id            String   @id @default(uuid())
-  insuranceName String
-  user          UserTest @relation(fields: [userId], references: [id])
-  userId        String   @unique
+  user          User?
+  fname         String
+  mname         String
+  lname         String
+  nameSuffix    String?
+  bdate         DateTime
+  contactNumber String
+  email         String   @unique
+  address       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Note: Optional one-to-one
+  healthcareProfessionalInfo HealthcareProfessionalInfo? @relation(fields: [healthcareProfessionalId], references: [id])
+  healthcareProfessionalId   String?                     @unique
 }
 
-model ProfileTest {
-  id               String                @id @default(uuid())
-  user             UserTest?
-  fname            String
-  mname            String
-  lname            String
-  nameSuffix       String?
-  bdate            DateTime
-  age              Int
-  contactNumber    Int
-  email            String?
-  currentAddress   String
-  permanentAddress String
-  emergencyContact EmergenyContactTest[]
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
+model HealthcareProfessionalInfo {
+  id            String       @id @default(uuid())
+  licenseNumber String
+  licenseDate   DateTime
+  userProfile   UserProfile?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
-model RoleTest {
-  id        String   @id @default(uuid())
-  roleName  String   @unique
+model Patient {
+  id         String @id @default(uuid())
+  hospitalId String
+
+  patientProfile   PatientProfile @relation(fields: [patientProfileId], references: [id])
+  patientProfileId String         @unique
+
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+  medicalRecordId String?        @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PatientProfile {
+  id      String   @id @default(uuid())
+  patient Patient?
+
+  fname         String
+  mname         String
+  lname         String
+  nameSuffix    String?
+  age           String
+  gender        String // Male, Female
+  bdate         DateTime
+  bplace        String
+  civilStatus   String // Single, Married, Widowed, Separated
+  occupation    String
+  contactNumber String
+  email         String?
+  address       String
+
+  alertMedication       String
+  allergies             String // TODO: Create Allergies Table
+  isSmoking             Boolean
+  isCovidVaccinated     Boolean
+  isDengvaxiaVaccinated Boolean
+  // patient Patient?
+
+  // opdRecord OpdRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalRecord {
+  id      String   @id @default(uuid())
+  patient Patient?
+
+  opdRecord OpdRecord[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OpdRecord {
+  id              String         @id @default(uuid())
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+  medicalRecordId String?
+
+  initialCheckUp   InitialCheckUp? @relation(fields: [initialCheckUpId], references: [id])
+  initialCheckUpId String?         @unique
+
+  followUpCheckUp FollowUpCheckUp[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InitialCheckUp {
+  id        String     @id @default(uuid())
+  opdRecord OpdRecord?
+
+  accompaniedBy String
+  chiefComplaint String
+
+  vitalSigns   VitalSigns @relation(fields: [vitalSignsId], references: [id])
+  vitalSignsId String     @unique
+
+  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
+  diagnosisId String    @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FollowUpCheckUp {
+  id          String     @id @default(uuid())
+  opdRecord   OpdRecord? @relation(fields: [opdRecordId], references: [id])
+  opdRecordId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users UserTest[]
+  vitalSigns   VitalSigns @relation(fields: [vitalSignsId], references: [id])
+  vitalSignsId String     @unique
+
+  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
+  diagnosisId String    @unique
 }
 
-model AppointmentTest {
-  id                String   @id @default(uuid())
-  appointmentStatus String
-  appointmentDate   DateTime
+model Diagnosis {
+  id                  String @id @default(uuid())
+
+  physician             User?    @relation(fields: [physicianId], references: [id])
+  physicianId            String?
+
+  physicalExamination String
+  diagnosis      String
+  treatment          String
+
+  initialCheckUp  InitialCheckUp?
+  followUpCheckUp FollowUpCheckUp?
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  user   UserTest @relation(fields: [userId], references: [id])
-  userId String   @unique
+  initialCheckUpId  String?
+  followUpCheckUpId String?
+  
 }
 
-model EmergenyContactTest {
-  id                           String  @id @default(uuid())
-  emergencyContactName         String
-  emergencyContactRelationship String
-  emergencyContactAddress      String
-  emergencyContactPhoneNum     Int
-  emergencyContactEmail        String?
+model VitalSigns {
+  id          String @id @default(uuid())
+  nurse User   @relation(fields: [nurseId], references: [id])
+  nurseId    String
 
-  profile   ProfileTest @relation(fields: [profileId], references: [id])
-  profileId String
+  initialCheckUp  InitialCheckUp?
+  followUpCheckUp FollowUpCheckUp?
+
+  heightInCm               Int
+  weightInKl               Int
+  bloodPressure            Int
+  pulseRate                String
+  respiratoryRate          String
+  bodyTemperatureInCelsius Int
+  oxygenSaturation         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+// model LaboratoryProcedures {
+//   id        String   @id @default(uuid())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model CovidVaccination {
+//   id String @id @default(uuid())
+// }
+
+// model PregnancyInformation {
+//   id             String  @id @default(uuid())
+//   gravida        Int?
+//   para           Int?
+//   lmp            String?
+//   termBirth      Int?
+//   pretermBirth   Int?
+//   miscarriages   Int?
+//   livingChildren Int?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+// // =================== TEST ===================
+// model UsersTest {
+//   id        String   @id @default(uuid())
+//   isActive  Boolean  @default(true)
+//   username  String   @unique
+//   password  String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   role   RoleTest @relation(fields: [roleId], references: [id])
+//   roleId String
+
+//   profile   ProfileTest @relation(fields: [profileId], references: [id])
+//   profileId String      @unique
+
+//   appointments AppointmentTest[]
+//   insurances   InsuranceTest[]
+// }
+
+// model UserTest {
+//   id        String   @id @default(uuid())
+//   isActive  Boolean  @default(true)
+//   username  String   @unique
+//   password  String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   role   RoleTest @relation(fields: [roleId], references: [id])
+//   roleId String
+
+//   profile   ProfileTest @relation(fields: [profileId], references: [id])
+//   profileId String      @unique
+
+//   appointments AppointmentTest[]
+//   insurances   InsuranceTest[]
+// }
+
+// model InsuranceTest {
+//   id            String   @id @default(uuid())
+//   insuranceName String
+//   user          UserTest @relation(fields: [userId], references: [id])
+//   userId        String   @unique
+// }
+
+// model ProfileTest {
+//   id                String    @id @default(uuid())
+//   user              UserTest?
+//   fname             String
+//   mname             String
+//   lname             String
+//   nameSuffix        String?
+//   bdate             DateTime
+//   age               Int
+//   contactNumber     Int
+//   email             String?
+//   currentAddress    String
+//   permanentAddress  String
+//   emergencyContact EmergenyContactTest[]
+//   createdAt         DateTime  @default(now())
+//   updatedAt         DateTime  @updatedAt
+// }
+
+// model RoleTest {
+//   id        String   @id @default(uuid())
+//   roleName  String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   users UserTest[]
+// }
+
+// model AppointmentTest {
+//   id                String   @id @default(uuid())
+//   appointmentStatus String
+//   appointmentDate   DateTime
+//   createdAt         DateTime @default(now())
+//   updatedAt         DateTime @updatedAt
+
+//   user   UserTest @relation(fields: [userId], references: [id])
+//   userId String   @unique
+// }
+
+// model EmergenyContactTest {
+//   id          String  @id @default(uuid())
+//   emergencyContactName         String
+//   emergencyContactRelationship String
+//   emergencyContactAddress      String
+//   emergencyContactPhoneNum     Int
+//   emergencyContactEmail        String?
+
+//   profile ProfileTest @relation(fields: [profileId], references: [id])
+//   profileId String
+// }
 
 // model PersonalInformation {
 //   id String   @id @default(uuid())
