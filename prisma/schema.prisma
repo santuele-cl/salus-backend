@@ -7,54 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
-  id       String @id @default(uuid())
-  roleName String @unique
-  users    User[]
+enum Role {
+  ADMIN
+  NURSE
+  PHYSICIAN
+}
+
+enum Department {
+  OPTHAL
+  OBGYNE
+  SURGERY
 }
 
 model User {
-  id       String  @id @default(uuid())
-  isActive Boolean @default(true)
-  username String  @unique
-  password String
-
-  role   Role   @relation(fields: [roleId], references: [id])
-  roleId String
-
-  profile   UserProfile @relation(fields: [profileId], references: [id])
-  profileId String      @unique
-
-  vitalSignsChecked VitalSigns[]
-  diagnoses         Diagnosis[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Department {
-  id   String @id @default(uuid())
-  name String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String      @id @default(nanoid(10))
+  isActive      Boolean     @default(true)
+  username      String      @unique
+  password      String
+  role          Role
+  roleId        String
+  profile       UserProfile @relation(fields: [profileId], references: [id])
+  profileId     String      @unique
+  vitalsChecked Vitals[]
+  diagnoses     Diagnosis[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model UserProfile {
-  id            String   @id @default(uuid())
-  user          User?
-  fname         String
-  mname         String
-  lname         String
-  nameSuffix    String?
-  bdate         DateTime
-  contactNumber String
-  email         String   @unique
-  address       String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Note: Optional one-to-one
+  id                         String                      @id @default(uuid())
+  user                       User?
+  fname                      String
+  mname                      String
+  lname                      String
+  nameSuffix                 String?
+  bdate                      DateTime
+  contactNumber              String
+  email                      String                      @unique
+  address                    String
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
   healthcareProfessionalInfo HealthcareProfessionalInfo? @relation(fields: [healthcareProfessionalId], references: [id])
   healthcareProfessionalId   String?                     @unique
 }
@@ -69,134 +61,100 @@ model HealthcareProfessionalInfo {
 }
 
 model Patient {
-  id         String @id @default(uuid())
-  hospitalId String
-
+  patientId        String         @id @default(nanoid(12))
   patientProfile   PatientProfile @relation(fields: [patientProfileId], references: [id])
   patientProfileId String         @unique
-
-  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
-  medicalRecordId String?        @unique
+  patientChart     PatientChart?  @relation(fields: [patientChartId], references: [id])
+  patientChartId   String?        @unique
+  patientInsurance Insurance      @relation(fields: [insuranceId], references: [id])
+  insuranceId      String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model PatientProfile {
-  id      String   @id @default(uuid())
-  patient Patient?
-
-  fname         String
-  mname         String
-  lname         String
-  nameSuffix    String?
-  age           String
-  gender        String // Male, Female
-  bdate         DateTime
-  bplace        String
-  civilStatus   String // Single, Married, Widowed, Separated
-  occupation    String
-  contactNumber String
-  email         String?
-  address       String
-
+  id                    String   @id @default(uuid())
+  patient               Patient?
+  fname                 String
+  mname                 String
+  lname                 String
+  nameSuffix            String?
+  age                   String
+  gender                String // Male, Female
+  bdate                 DateTime
+  bplace                String
+  civilStatus           String // Single, Married, Widowed, Separated
+  occupation            String
+  contactNumber         String
+  email                 String?
+  address               String
   alertMedication       String
   allergies             String // TODO: Create Allergies Table
   isSmoking             Boolean
   isCovidVaccinated     Boolean
   isDengvaxiaVaccinated Boolean
-  // patient Patient?
-
-  // opdRecord OpdRecord[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
-model MedicalRecord {
-  id      String   @id @default(uuid())
-  patient Patient?
-
+model PatientChart {
+  id        String      @id @default(uuid())
+  patient   Patient?
   opdRecord OpdRecord[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Insurance {
+  id        String    @id @default(uuid())
+  Patient   Patient[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model OpdRecord {
-  id              String         @id @default(uuid())
-  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
-  medicalRecordId String?
-
-  initialCheckUp   InitialCheckUp? @relation(fields: [initialCheckUpId], references: [id])
-  initialCheckUpId String?         @unique
-
-  followUpCheckUp FollowUpCheckUp[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String        @id @default(uuid())
+  patientChart   PatientChart? @relation(fields: [patientChartId], references: [id])
+  patientChartId String?
+  visits         Visit[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
-model InitialCheckUp {
-  id        String     @id @default(uuid())
-  opdRecord OpdRecord?
-
-  accompaniedBy String
-  chiefComplaint String
-
-  vitalSigns   VitalSigns @relation(fields: [vitalSignsId], references: [id])
-  vitalSignsId String     @unique
-
-  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
-  diagnosisId String    @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model FollowUpCheckUp {
+model Visit {
   id          String     @id @default(uuid())
   opdRecord   OpdRecord? @relation(fields: [opdRecordId], references: [id])
   opdRecordId String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  vitalSigns   VitalSigns @relation(fields: [vitalSignsId], references: [id])
-  vitalSignsId String     @unique
-
-  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
-  diagnosisId String    @unique
+  accompaniedBy  String?
+  chiefComplaint String
+  vitals         Vitals    @relation(fields: [vitalsId], references: [id])
+  vitalsId       String    @unique
+  diagnosis      Diagnosis @relation(fields: [diagnosisId], references: [id])
+  diagnosisId    String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Diagnosis {
-  id                  String @id @default(uuid())
-
-  physician             User?    @relation(fields: [physicianId], references: [id])
-  physicianId            String?
-
+  id                  String   @id @default(uuid())
+  physician           User?    @relation(fields: [physicianId], references: [id])
+  physicianId         String?
   physicalExamination String
-  diagnosis      String
-  treatment          String
-
-  initialCheckUp  InitialCheckUp?
-  followUpCheckUp FollowUpCheckUp?
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  initialCheckUpId  String?
-  followUpCheckUpId String?
-  
+  diagnosis           String
+  treatment           String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  initialCheckUpId    String?
+  followUpCheckUpId   String?
+  Visit               Visit?
 }
 
-model VitalSigns {
-  id          String @id @default(uuid())
-  nurse User   @relation(fields: [nurseId], references: [id])
-  nurseId    String
-
-  initialCheckUp  InitialCheckUp?
-  followUpCheckUp FollowUpCheckUp?
-
+model Vitals {
+  id                       String   @id @default(uuid())
+  nurse                    User     @relation(fields: [nurseId], references: [id])
+  nurseId                  String
   heightInCm               Int
   weightInKl               Int
   bloodPressure            Int
@@ -204,11 +162,35 @@ model VitalSigns {
   respiratoryRate          String
   bodyTemperatureInCelsius Int
   oxygenSaturation         String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  Visit                    Visit?
 }
 
+// model InitialCheckUp {
+//   id             String     @id @default(uuid())
+//   opdRecord      OpdRecord?
+//   accompaniedBy  String
+//   chiefComplaint String
+//   vitalSigns     VitalSigns @relation(fields: [vitalSignsId], references: [id])
+//   vitalSignsId   String     @unique
+//   diagnosis      Diagnosis  @relation(fields: [diagnosisId], references: [id])
+//   diagnosisId    String     @unique
+//   createdAt      DateTime   @default(now())
+//   updatedAt      DateTime   @updatedAt
+// }
+
+// model FollowUpCheckUp {
+//   id           String     @id @default(uuid())
+//   opdRecord    OpdRecord? @relation(fields: [opdRecordId], references: [id])
+//   opdRecordId  String?
+//   createdAt    DateTime   @default(now())
+//   updatedAt    DateTime   @updatedAt
+//   vitalSigns   VitalSigns @relation(fields: [vitalSignsId], references: [id])
+//   vitalSignsId String     @unique
+//   diagnosis    Diagnosis  @relation(fields: [diagnosisId], references: [id])
+//   diagnosisId  String     @unique
+// }
 // model LaboratoryProcedures {
 //   id        String   @id @default(uuid())
 //   createdAt DateTime @default(now())
@@ -386,4 +368,16 @@ model VitalSigns {
 //   user User @relation(fields: [userId], references: [id])
 //   userId String @unique
 //   userRoles UserRole[]
+// }
+// model Role {
+//   id       String @id @default(uuid())
+//   roleName String @unique
+//   users    User[]
+// }
+
+// model Department {
+//   id        String   @id @default(uuid())
+//   name      String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 // }
