@@ -18,12 +18,12 @@ router.use(verifyJWT);
 router
   .route("/")
   .get(verifyRole(["admin"]), getUsers)
-  .post(verifyRole(["admin"]), createNewUser);
+  .post(verifyRole(["ADMIN"]), createNewUser);
 
 router
   .route("/:userId")
   .get(verifyUserId, getUserById)
-  .patch(verifyRole(["admin"]), updateUser)
-  .delete(verifyRole(["admin"]), deleteUser);
+  .patch(verifyRole(["ADMIN"]), updateUser)
+  .delete(verifyRole(["ADMIN"]), deleteUser);
 
 export default router;

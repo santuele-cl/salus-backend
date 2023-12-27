@@ -1,27 +1,16 @@
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 8);
 
 import prismaInstance from "../../prisma/prismaClient.js";
-
-// const VALID_USER_ROLES = ["employee", "manager", "admin"];
-
-// const isValidRole = (roleReference, roleInput) => {
-//   return roleInput.every((role) => roleReference.includes(role));
-// };
 
 // @desc    Get all users
 // @route   GET /users
 // @access  Private
 const getUsers = asyncHandler(async (req, res) => {
   const users = await prismaInstance.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    // include: { profile: true, role: true },
   });
 
   if (!users?.length) {
@@ -43,14 +32,6 @@ const getUserById = asyncHandler(async (req, res) => {
 
   const user = await prismaInstance.user.findUnique({
     where: { id },
-    select: {
-      id: true,
-      username: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-    },
   });
 
   if (!user) {
@@ -64,7 +45,7 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route   POST /users
 // @access  Private
 const createNewUser = asyncHandler(async (req, res) => {
-  const { username, password, roleId } = req.body;
+  const { username, password, roleId, profile } = req.body;
 
   // @func  Confirm request data
   if (!username || !password || !roleId) {
@@ -89,8 +70,17 @@ const createNewUser = asyncHandler(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // @func  Create and store new user
+  // const user = await prismaInstance.user.create({data: {}})
   const user = await prismaInstance.user.create({
-    data: { username, password: hashedPassword, roleId },
+    data: {
+      id: `U${nanoid().toUpperCase()}`,
+      username,
+      password: hashedPassword,
+      role: { connect: { id: roleId } },
+      userProfile: {
+        create: { id: `P${nanoid().toUpperCase()}`, ...profile },
+      },
+    },
   });
 
   if (user) {
@@ -124,14 +114,16 @@ const updateUser = asyncHandler(async (req, res) => {
 // // @route   Delete /users/:id
 // // @access  Private
 const deleteUser = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const { userId: id } = req.params;
 
   if (!id) {
     return res.status(400).json({ message: "User ID missing." });
   }
 
   // @func  Check if user exist
+  // const user = await prismaInstance.user.findUnique({ where: { id } });
   const user = await prismaInstance.user.findUnique({ where: { id } });
+
   if (!user) {
     return res.status(400).json({ message: "User not found." });
   }

@@ -20,6 +20,7 @@ model User {
 
   role   Role   @relation(fields: [roleId], references: [id])
   roleId String
+
   // profile Profile?
 }
 
@@ -30,6 +31,23 @@ model Role {
 }
 
 // =================== TEST ===================
+model UsersTest {
+  id        String   @id @default(uuid())
+  isActive  Boolean  @default(true)
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role   RoleTest @relation(fields: [roleId], references: [id])
+  roleId String
+
+  profile   ProfileTest @relation(fields: [profileId], references: [id])
+  profileId String      @unique
+
+  appointments AppointmentTest[]
+  insurances   InsuranceTest[]
+}
 
 model UserTest {
   id        String   @id @default(uuid())
@@ -50,10 +68,12 @@ model UserTest {
 }
 
 model InsuranceTest {
-  id            String   @id @default(uuid())
+  id            String     @id @default(uuid())
   insuranceName String
-  user          UserTest @relation(fields: [userId], references: [id])
-  userId        String   @unique
+  user          UserTest   @relation(fields: [userId], references: [id])
+  userId        String     @unique
+  UsersTest     UsersTest? @relation(fields: [usersTestId], references: [id])
+  usersTestId   String?
 }
 
 model ProfileTest {
@@ -72,6 +92,7 @@ model ProfileTest {
   emergencyContact EmergenyContactTest[]
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
+  UsersTest        UsersTest?
 }
 
 model RoleTest {
@@ -80,7 +101,8 @@ model RoleTest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users UserTest[]
+  users     UserTest[]
+  UsersTest UsersTest[]
 }
 
 model AppointmentTest {
@@ -90,8 +112,10 @@ model AppointmentTest {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user   UserTest @relation(fields: [userId], references: [id])
-  userId String   @unique
+  user        UserTest   @relation(fields: [userId], references: [id])
+  userId      String     @unique
+  UsersTest   UsersTest? @relation(fields: [usersTestId], references: [id])
+  usersTestId String?
 }
 
 model EmergenyContactTest {

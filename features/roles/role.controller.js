@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 
 import prismaInstance from "../../prisma/prismaClient.js";
+import { nanoid } from "nanoid";
 
 // @desc    Get all roles
 // @route   GET /roles
@@ -43,7 +44,9 @@ const postRole = asyncHandler(async (req, res) => {
   }
 
   // @func  Create and store new role
-  const createdRole = await prismaInstance.role.create({ data: { roleName } });
+  const createdRole = await prismaInstance.role.create({
+    data: { id: `R${nanoid(4).toUpperCase()}`, roleName },
+  });
 
   if (createdRole) {
     res.status(201).json({ message: "Role created successfully." });
@@ -56,7 +59,8 @@ const postRole = asyncHandler(async (req, res) => {
 // @route   PATCH /roles/:id
 // @access  Private
 const updateRole = asyncHandler(async (req, res) => {
-  const { roleId: id, roleName } = req.body;
+  const { id } = req.params;
+  const { roleName } = req.body;
   console.log(req.body);
 
   //   // Verify Role by Id
@@ -82,7 +86,7 @@ const updateRole = asyncHandler(async (req, res) => {
 // // @route   Delete /roles/:id
 // // @access  Private
 const deleteRole = asyncHandler(async (req, res) => {
-  const { roleId: id } = req.body;
+  const { roleId: id } = req.params;
 
   if (!id) {
     return res.status(400).json({ message: "Role ID missing." });

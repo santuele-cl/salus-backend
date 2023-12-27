@@ -12,11 +12,8 @@ const router = Router();
 
 router.use(verifyJWT);
 router.use(verifyRole(["admin"]));
-router
-  .route("/")
-  .get(getRoles)
-  .post(postRole)
-  .patch(updateRole)
-  .delete(deleteRole);
+router.route("/").get(getRoles).post(postRole);
+
+router.route("/:roleId").patch(updateRole).delete(deleteRole);
 
 export default router;
