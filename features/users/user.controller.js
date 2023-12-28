@@ -5,17 +5,31 @@ const nanoid = customAlphabet("1234567890abcdef", 8);
 
 import prismaInstance from "../../prisma/prismaClient.js";
 
+function exclude(user, keys) {
+  return Object.fromEntries(
+    Object.entries(user).filter(([key]) => !keys.includes(key))
+  );
+}
+
 // @desc    Get all users
 // @route   GET /users
 // @access  Private
 const getUsers = asyncHandler(async (req, res) => {
   const users = await prismaInstance.user.findMany({
-    // include: { profile: true, role: true },
+    // select: {
+    //   id: true,
+    //   isActive: true,
+    //   role: true,
+    //   username: true,
+    //   // userProfile: true,
+    // },
   });
 
   if (!users?.length) {
     return res.status(400).json({ message: "No users found." });
   }
+
+  const filteredUsers = exclude(users, ["password"]);
 
   res.status(200).json(users);
 });
@@ -32,6 +46,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
   const user = await prismaInstance.user.findUnique({
     where: { id },
+    include: { userProfile: true, role: true },
   });
 
   if (!user) {
