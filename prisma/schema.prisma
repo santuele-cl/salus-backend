@@ -10,8 +10,8 @@ datasource db {
 model Configuration {
   id        String   @id @default(nanoid(10))
   name      String
-  logo      String
-  loginBg   String
+  logo      String   @db.Text
+  loginBg   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

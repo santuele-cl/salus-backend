@@ -1,107 +1,101 @@
 import asyncHandler from "express-async-handler";
 
 import prismaInstance from "../../prisma/prismaClient.js";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 6);
 
-// @desc    Get all roles
-// @route   GET /roles
+// @desc    Get configuration
+// @route   GET /configuration
 // @access  Private
-const getRoles = asyncHandler(async (req, res) => {
-  // const { skip, take } = req.query;
-  const roles = await prismaInstance.role
-    .findMany
-    //   {
-    //   skip: parseInt(skip),
-    //   take: parseInt(take),
-    // }
-    ();
+const getConfig = asyncHandler(async (req, res) => {
+  const config = await prismaInstance.configuration.findFirst();
 
-  if (!roles?.length) {
-    return res.status(400).json({ message: "No roles found." });
+  if (!config) {
+    return res.status(400).json({ message: "No config found." });
   }
 
-  res.status(200).json(roles);
+  res.status(200).json(config);
 });
 
-// @desc    Create new role
-// @route   POST /roles
+// @desc    Create new configuration
+// @route   POST /configuration
 // @access  Private
-const postRole = asyncHandler(async (req, res) => {
-  const { roleName } = req.body;
+const postConfig = asyncHandler(async (req, res) => {
+  const { name, logo, loginBg } = req.body;
 
-  // Validate roleName
-  if (!roleName) {
-    return res.status(400).json({ message: "Role name is missing." });
+  // @func  Confirm request data
+  if (!name || !logo || !loginBg) {
+    const errMessage = [];
+    if (!name) errMessage.push("Name is missing.");
+    if (!logo) errMessage.push("Logo is missing.");
+    if (!loginBg) errMessage.push("Login background is missing.");
+
+    return res.status(400).json({ message: errMessage.join(" ") });
   }
 
-  // @func  Check for duplicate
-  const duplicateRole = await prismaInstance.role.findUnique({
-    where: { roleName },
+  const newConfig = await prismaInstance.configuration.create({
+    data: { id: `C${nanoid().toUpperCase()}`, name, logo, loginBg },
   });
 
-  if (duplicateRole) {
-    return res.status(409).json({ message: "Role is already existing." });
-  }
-
-  // @func  Create and store new role
-  const createdRole = await prismaInstance.role.create({
-    data: { id: `R${nanoid(4).toUpperCase()}`, roleName },
-  });
-
-  if (createdRole) {
-    res.status(201).json({ message: "Role created successfully." });
+  if (newConfig) {
+    res.status(201).json({ message: "Configuration created successfully." });
   } else {
-    res.status(400).json({ message: "Invalid data received." });
+    res.status(400).json({ message: "Invalid configuration data received." });
   }
 });
 
 // @desc    Update a role
-// @route   PATCH /roles/:id
+// @route   PATCH /configuration/:id
 // @access  Private
-const updateRole = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { roleName } = req.body;
-  console.log(req.body);
+const updateConfig = asyncHandler(async (req, res) => {
+  const { configId: id } = req.params;
+  const { name, logo, loginBg } = req.body;
 
   //   // Verify Role by Id
-  const role = await prismaInstance.role.findUnique({ where: { id } });
-
-  if (!role) {
-    return res.status(404).json({ message: "Role not found." });
-  }
-
-  const updatedRole = await prismaInstance.role.update({
+  const config = await prismaInstance.configuration.findUnique({
     where: { id },
-    data: { roleName },
   });
 
-  if (updatedRole) {
-    res.json({ message: `${updatedRole.roleName} updated.` });
+  if (!config) {
+    return res.status(404).json({ message: "Config not found." });
+  }
+
+  const updatedConfig = await prismaInstance.configuration.update({
+    where: { id },
+    data: { name, logo, loginBg },
+  });
+
+  if (updatedConfig) {
+    res.json({ message: `Config with ${updatedConfig.id} ID updated.` });
   } else {
-    res.status(400).json({ message: "Role not created." });
+    res.status(400).json({ message: "Config not updated." });
   }
 });
 
-// // @desc    Delete a role
-// // @route   Delete /roles/:id
+// // @desc    Delete a config
+// // @route   Delete /configuration/:id
 // // @access  Private
-const deleteRole = asyncHandler(async (req, res) => {
-  const { roleId: id } = req.params;
+const deleteConfig = asyncHandler(async (req, res) => {
+  const { configId: id } = req.params;
 
   if (!id) {
-    return res.status(400).json({ message: "Role ID missing." });
+    return res.status(400).json({ message: "Config ID missing." });
   }
 
-  const role = await prismaInstance.role.findUnique({ where: { id } });
-  if (!role) {
-    return res.status(404).json({ message: "Role not found." });
+  const config = await prismaInstance.configuration.findUnique({
+    where: { id },
+  });
+  if (!config) {
+    return res.status(404).json({ message: "Config not found." });
   }
 
-  const deletedRole = await prismaInstance.role.delete({ where: { id } });
+  const deletedConfig = await prismaInstance.configuration.delete({
+    where: { id },
+  });
 
   res.status(200).json({
-    message: `Role ${deletedRole.roleName} with ID ${deletedRole.id} deleted.`,
+    message: `Configuration with ID ${deletedConfig.id} deleted.`,
   });
 });
 
-export { getRoles, postRole, updateRole, deleteRole };
+export { getConfig, postConfig, updateConfig, deleteConfig };
