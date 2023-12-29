@@ -71,6 +71,15 @@ const main = async () => {
         },
       },
     });
+
+    const config = await prismaInstance.configuration.create({
+      data: {
+        id: "C58923F",
+        name: "Salus",
+        logo: "",
+        loginBg: "",
+      },
+    });
   }
 };
 
