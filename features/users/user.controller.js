@@ -11,32 +11,21 @@ function exclude(user, keys) {
   );
 }
 
-// @desc    Get all users
-// @route   GET /users
-// @access  Private
+// @desc   GET /users         Private
 const getUsers = asyncHandler(async (req, res) => {
   const users = await prismaInstance.user.findMany({
-    // select: {
-    //   id: true,
-    //   isActive: true,
-    //   role: true,
-    //   username: true,
-    //   // userProfile: true,
-    // },
+    include: { role: true, clinicalDepartment: true },
   });
 
   if (!users?.length) {
     return res.status(400).json({ message: "No users found." });
   }
+  const filteredUsers = users.map((user) => exclude(user, ["password"]));
 
-  const filteredUsers = exclude(users, ["password"]);
-
-  res.status(200).json(users);
+  res.status(200).json(filteredUsers);
 });
 
-// @desc    Get a user by ID
-// @route   GET /users/:id
-// @access  Private
+// @desc   GET /users/:id     Private
 const getUserById = asyncHandler(async (req, res) => {
   const { userId: id } = req.params;
 
@@ -46,19 +35,19 @@ const getUserById = asyncHandler(async (req, res) => {
 
   const user = await prismaInstance.user.findUnique({
     where: { id },
-    include: { userProfile: true, role: true },
+    include: { userProfile: true, role: { select: { roleName: true } } },
   });
 
   if (!user) {
     return res.status(400).json({ message: "User not found." });
   }
 
-  res.status(200).json(user);
+  const filteredUser = exclude(user, ["password"]);
+
+  res.status(200).json(filteredUser);
 });
 
-// @desc    Create new user
-// @route   POST /users
-// @access  Private
+// @desc   POST /users        Private
 const createNewUser = asyncHandler(async (req, res) => {
   const { username, password, roleId, profile } = req.body;
 
@@ -105,9 +94,7 @@ const createNewUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update a user
-// @route   PATCH /users/:id
-// @access  Private
+// @desc   PATCH /users/:id   Private
 const updateUser = asyncHandler(async (req, res) => {
   const { id, username } = req.body;
 
@@ -125,9 +112,7 @@ const updateUser = asyncHandler(async (req, res) => {
   res.json({ message: `${updatedUser.username} updated.` });
 });
 
-// // @desc    Delete a user
-// // @route   Delete /users/:id
-// // @access  Private
+// @desc   Delete /users/:id  Private
 const deleteUser = asyncHandler(async (req, res) => {
   const { userId: id } = req.params;
 

@@ -24,24 +24,38 @@ model Role {
   users     User[]
 }
 
-enum Department {
-  OPTHAL
-  OBGYNE
-  SURGERY
+model ClinicalDepartment {
+  id               String   @id @default(nanoid(4))
+  clinicalDeptName String   @unique
+  clinicalDeptHead String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  users            User[]
 }
 
 model User {
-  id          String       @id @default(nanoid(8))
-  isActive    Boolean      @default(true)
-  username    String       @unique
-  password    String
+  id       String  @id @default(nanoid(8))
+  isActive Boolean @default(true)
+  username String  @unique
+  password String
+
   userProfile UserProfile?
-  role        Role?        @relation(fields: [roleId], references: [id])
-  roleId      String?
+
+  role   Role?   @relation(fields: [roleId], references: [id])
+  roleId String?
+
+  clinicalDepartment   ClinicalDepartment? @relation(fields: [clinicalDepartmentId], references: [id])
+  clinicalDepartmentId String?
 
   vitalsChecked Vitals[]
-  diagnoses     Diagnosis[]
+  evaluation    Evaluation[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Verification {
+  id        String   @id @default(nanoid(8))
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -74,20 +88,29 @@ model HealthcareProfessionalInfo {
 }
 
 model Patient {
-  patientId        String         @id @default(nanoid(10))
-  patientProfile   PatientProfile @relation(fields: [patientProfileId], references: [id], onDelete: Cascade)
-  patientProfileId String         @unique
-  patientChart     PatientChart?  @relation(fields: [patientChartId], references: [id], onDelete: Cascade)
-  patientChartId   String?        @unique
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id             String          @id @default(nanoid(10))
+  patientProfile PatientProfile?
+  patientChart   PatientChart?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   // patientInsurance Insurance      @relation(fields: [insuranceId], references: [id])
   // insuranceId      String
 }
 
+enum CivilStatus {
+  SINGLE
+  MARRIED
+  WIDOWED
+  SEPARATED
+}
+
 model PatientProfile {
-  id                    String   @id @default(uuid())
-  patient               Patient?
+  id String @id @default(nanoid(10))
+
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId String  @unique
+
   fname                 String
   mname                 String
   lname                 String
@@ -96,79 +119,93 @@ model PatientProfile {
   gender                String // Male, Female
   bdate                 DateTime
   bplace                String
-  civilStatus           String // Single, Married, Widowed, Separated
-  occupation            String
+  civilStatus           CivilStatus // Single, Married, Widowed, Separated
+  occupation            String?
   contactNumber         String
-  email                 String?
+  email                 String      @unique
   address               String
-  alertMedication       String
-  allergies             String // TODO: Create Allergies Table
-  isSmoking             Boolean
-  isCovidVaccinated     Boolean
-  isDengvaxiaVaccinated Boolean
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  alertMedication       String?
+  allergies             String? // TODO: Create Allergies Table
+  isSmoking             Boolean     @default(false)
+  isCovidVaccinated     Boolean     @default(false)
+  isDengvaxiaVaccinated Boolean     @default(false)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 }
 
 model PatientChart {
-  id        String      @id @default(uuid())
-  patient   Patient?
-  opdRecord OpdRecord[]
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id String @id @default(nanoid(10))
+
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientId String  @unique
+
+  visits Visit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model OpdRecord {
-  id             String        @id @default(uuid())
-  patientChart   PatientChart? @relation(fields: [patientChartId], references: [id], onDelete: Cascade)
-  patientChartId String?
-  visits         Visit[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+model ServiceDepartment {
+  id String @id @default(nanoid(4))
+
+  serviceDeptName String @unique
+  serviceDeptHead String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  visit     Visit[]
 }
 
 model Visit {
-  id             String     @id @default(uuid())
-  opdRecord      OpdRecord? @relation(fields: [opdRecordId], references: [id])
-  opdRecordId    String?
+  id String @id @default(nanoid(16))
+
+  patientChart   PatientChart? @relation(fields: [patientChartId], references: [id], onDelete: Cascade)
+  patientChartId String?
+
   accompaniedBy  String?
   chiefComplaint String
-  hpi            String?
+  hpi            String
 
-  vitals   Vitals @relation(fields: [vitalsId], references: [id])
-  vitalsId String @unique
+  serviceDepartment   ServiceDepartment? @relation(fields: [serviceDepartmentId], references: [id])
+  serviceDepartmentId String?
 
-  diagnosis   Diagnosis @relation(fields: [diagnosisId], references: [id])
-  diagnosisId String    @unique
+  vitals Vitals?
 
-  prescription String
+  evaluation Evaluation?
+
   // prescription   Prescription @relation(fields: [prescriptionId], references: [id])
   // prescriptionId String       @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Diagnosis {
-  id String @id @default(uuid())
+model Evaluation {
+  id String @id @default(nanoid(16))
 
-  physician   User?   @relation(fields: [physicianId], references: [id], onDelete: Cascade)
+  physician   User?   @relation(fields: [physicianId], references: [id])
   physicianId String?
+
+  visit   Visit  @relation(fields: [visitId], references: [id])
+  visitId String @unique
 
   physicalExamination String
   diagnosis           String
   treatment           String
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  initialCheckUpId    String?
-  followUpCheckUpId   String?
+  prescription        String
 
-  Visit Visit?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Vitals {
-  id                       String   @id @default(uuid())
-  nurse                    User     @relation(fields: [nurseId], references: [id], onDelete: Cascade)
-  nurseId                  String
+  id String @id @default(nanoid(16))
+
+  nurse   User   @relation(fields: [nurseId], references: [id])
+  nurseId String
+
+  vitals   Visit  @relation(fields: [vitalsId], references: [id])
+  vitalsId String @unique
+
   heightInCm               Int
   weightInKl               Int
   bloodPressure            Int
@@ -178,7 +215,6 @@ model Vitals {
   oxygenSaturation         String
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
-  Visit                    Visit?
 }
 
 // model Prescription {

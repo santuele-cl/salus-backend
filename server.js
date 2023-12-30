@@ -14,6 +14,7 @@ import errorRoute from "./features/error/error.route.js";
 import userRoute from "./features/users/user.route.js";
 import roleRoute from "./features/roles/role.route.js";
 import authRoute from "./features/auth/auth.route.js";
+import patientRoute from "./features/patient/patient.route.js";
 import configRoute from "./features/config/config.route.js";
 import testRoute from "./features/test/test.route.js";
 
@@ -45,6 +46,7 @@ app.use("/auth", authRoute);
 app.use("/roles", roleRoute);
 
 app.use("/users", userRoute);
+app.use("/patients", patientRoute);
 app.use("/config", configRoute);
 
 app.use("/test", testRoute);
