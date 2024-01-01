@@ -13,67 +13,56 @@ function exclude(item, keysToRemove) {
 
 const required = ["chiefComplaint", "hpi", "serviceDepartmentId"];
 
-const getAllVisits = asyncHandler(async (req, res) => {
-  const visits = await prismaInstance.visit.findMany({});
+// @desc   GET /users         Private
+const getCharts = asyncHandler(async (req, res) => {
+  const { patientId } = req.body;
 
-  if (!visits?.length) {
-    return res.status(400).json({ message: "No visits found." });
+  if (!patientId) {
+    return res.status(400).json({ message: "Patient ID is missing." });
   }
 
-  res.status(200).json(visits);
+  const patient = await prismaInstance.patient.findUnique({
+    where: { id: patientId },
+  });
+
+  if (!patient) {
+    return res.status(400).json({ message: "Patient not found." });
+  }
+
+  const charts = await prismaInstance.patientChart.findMany({
+    where: { patientId },
+  });
+
+  if (!charts?.length) {
+    return res.status(400).json({ message: "No chart found." });
+  }
+
+  res.status(200).json(charts);
 });
 
-// @desc   GET /users         Private
-const getVisitsByPatientChartId = asyncHandler(async (req, res) => {
+// @desc   GET /users/:id     Private
+const getChart = asyncHandler(async (req, res) => {
   const { patientChartId } = req.params;
 
   if (!patientChartId) {
-    return res.status(400).json({ message: "Patient Chart ID is missing." });
-  }
-
-  const patientChart = await prismaInstance.patientChart.findUnique({
-    where: { id: patientChartId },
-  });
-
-  if (!patientChart) {
-    return res.status(400).json({ message: "Patient Chart not found." });
+    return res.status(400).json({ message: "Visits does not found." });
   }
 
   const visits = await prismaInstance.visit.findMany({
     where: { patientChartId },
-    include: { serviceDepartment: true },
   });
 
-  if (!visits?.length) {
-    return res.status(400).json({ message: "No visits found." });
+  if (!visits) {
+    return res.status(400).json({ message: "Visits not found." });
   }
 
   res.status(200).json(visits);
-});
-
-// @desc   GET /users/:id     Private
-const getVisitById = asyncHandler(async (req, res) => {
-  const { visitId } = req.params;
-
-  if (!visitId) {
-    return res.status(400).json({ message: "Visit ID Missing" });
-  }
-
-  const visit = await prismaInstance.visit.findUnique({
-    where: { id: visitId },
-  });
-
-  if (!visit) {
-    return res.status(400).json({ message: "Visit not found." });
-  }
-
-  res.status(200).json(visit);
 });
 
 // @desc   POST /users        Private
 const createVisit = asyncHandler(async (req, res) => {
   const { patientChartId, visitData } = req.body;
-  console.log(visitData?.serviceDepartmentId);
+
   if (!visitData || !patientChartId) {
     return res.status(400).json({
       message: "Patient profile info is missing.",
@@ -91,12 +80,12 @@ const createVisit = asyncHandler(async (req, res) => {
   }
 
   const serviceDepartment = await prismaInstance.serviceDepartment.findUnique({
-    where: { id: visitData["serviceDepartmentId"] },
+    where: { id: visitData.serviceDepartmentId },
   });
 
   if (!serviceDepartment) {
     return res.status(400).json({
-      message: "Service Department ID does not exist.",
+      message: "Patient Chart ID info does not exist.",
     });
   }
 
@@ -186,11 +175,4 @@ const deleteVisit = asyncHandler(async (req, res) => {
   res.status(200).json({ message });
 });
 
-export {
-  getAllVisits,
-  getVisitsByPatientChartId,
-  getVisitById,
-  createVisit,
-  updateVisit,
-  deleteVisit,
-};
+export { getCharts };

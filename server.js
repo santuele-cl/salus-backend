@@ -15,6 +15,9 @@ import userRoute from "./features/users/user.route.js";
 import roleRoute from "./features/roles/role.route.js";
 import authRoute from "./features/auth/auth.route.js";
 import patientRoute from "./features/patient/patient.route.js";
+import visitRoute from "./features/visit/visit.route.js";
+// import evaluationRoute from "./features/evaluation/evaluation.route.js";
+import chartRoute from "./features/chart/chart.route.js";
 import configRoute from "./features/config/config.route.js";
 import testRoute from "./features/test/test.route.js";
 
@@ -47,6 +50,9 @@ app.use("/roles", roleRoute);
 
 app.use("/users", userRoute);
 app.use("/patients", patientRoute);
+app.use("/visits", visitRoute);
+// app.use("/evaluations", evaluationRoute);
+app.use("/charts", chartRoute);
 app.use("/config", configRoute);
 
 app.use("/test", testRoute);
