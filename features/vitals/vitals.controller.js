@@ -75,10 +75,11 @@ const getAllVitals = asyncHandler(async (req, res) => {
 // @desc   POST /users        Private
 const addVitals = asyncHandler(async (req, res) => {
   const { visitId, vitalsData } = req.body;
-
+  const requestingId = req.userId;
+  console.log(vitalsData);
   if (!vitalsData || !visitId) {
     return res.status(400).json({
-      message: "Patient profile info is missing.",
+      message: "Vitals info is missing.",
     });
   }
 
@@ -88,7 +89,7 @@ const addVitals = asyncHandler(async (req, res) => {
 
   if (!visit) {
     return res.status(400).json({
-      message: "Patient Chart ID info does not exist.",
+      message: "Visit ID does not exist.",
     });
   }
 
@@ -113,26 +114,20 @@ const addVitals = asyncHandler(async (req, res) => {
     });
   }
 
-  //   //  @desc Create visit
+  const vitals = await prismaInstance.vitals.create({
+    data: {
+      id: `V${nanoid().toUpperCase()}`,
+      visit: { connect: { id: visitId } },
+      nurse: { connect: { id: requestingId ? requestingId : "UZOPWLJ29" } },
+      ...vitalsData,
+    },
+  });
 
-  //   const { serviceDepartmentId, ...therest } = visitData;
-
-  //   const visit = await prismaInstance.visit.create({
-  //     data: {
-  //       id: `V${nanoid().toUpperCase()}`,
-  //       patientChart: {
-  //         connect: { id: patientChartId },
-  //       },
-  //       serviceDepartment: { connect: { id: visitData["serviceDepartmentId"] } },
-  //       ...therest,
-  //     },
-  //   });
-
-  //   if (visit) {
-  //     res.status(201).json({ message: "Visit created successfully." });
-  //   } else {
-  //     res.status(400).json({ message: "Invalid visit data received." });
-  //   }
+  if (vitals) {
+    res.status(201).json({ message: "Vitals added successfully." });
+  } else {
+    res.status(400).json({ message: "Invalid vitals data received." });
+  }
 });
 
 // @desc   PATCH /users/:id   Private

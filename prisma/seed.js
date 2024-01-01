@@ -212,7 +212,7 @@ const main = async () => {
           nurse: { connect: { id: "UZOPWLJ29" } },
           heightInCm: 160,
           weightInKl: 50,
-          bloodPressure: 100,
+          bloodPressure: "100",
           pulseRate: "100",
           respiratoryRate: "100",
           bodyTemperatureInCelsius: 50,
