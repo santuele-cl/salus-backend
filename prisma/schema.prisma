@@ -177,6 +177,7 @@ model Visit {
   // prescriptionId String       @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  vitalsId  String?
 }
 
 model Evaluation {
@@ -203,8 +204,8 @@ model Vitals {
   nurse   User   @relation(fields: [nurseId], references: [id])
   nurseId String
 
-  vitals   Visit  @relation(fields: [vitalsId], references: [id])
-  vitalsId String @unique
+  visit   Visit  @relation(fields: [visitId], references: [id])
+  visitId String @unique
 
   heightInCm               Int
   weightInKl               Int
@@ -215,6 +216,7 @@ model Vitals {
   oxygenSaturation         String
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
+  // Visit                    Visit[]
 }
 
 // model Prescription {

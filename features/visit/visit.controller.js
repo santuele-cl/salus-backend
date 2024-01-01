@@ -42,6 +42,7 @@ const getVisitsByPatientChartId = asyncHandler(async (req, res) => {
   const visits = await prismaInstance.visit.findMany({
     where: { patientChartId },
     include: { serviceDepartment: true },
+    orderBy: { createdAt: "desc" },
   });
 
   if (!visits?.length) {

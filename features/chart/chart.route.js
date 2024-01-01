@@ -1,19 +1,19 @@
-import { Router } from "express";
+// import { Router } from "express";
 
-import { getCharts } from "./chart.controller.js";
+// import { getCharts } from "./chart.controller.js";
 
-import verifyJWT from "../../middlewares/verifyJWT.middleware.js";
-import { verifyRole } from "../../middlewares/verifyRole.middleware.js";
-import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
+// import verifyJWT from "../../middlewares/verifyJWT.middleware.js";
+// import { verifyRole } from "../../middlewares/verifyRole.middleware.js";
+// import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
 
-const router = Router();
+// const router = Router();
 
-router.use(verifyJWT);
-router.route("/").get(verifyRole(["admin"]), getCharts);
-//   .post(verifyRole(["ADMIN"]), createVisit);
+// router.use(verifyJWT);
+// router.route("/").get(verifyRole(["admin"]), getCharts);
+// //   .post(verifyRole(["ADMIN"]), createVisit);
 
-router.route("/:patientChartId").get(verifyUserId, getPatientVisits);
-//   .patch(verifyRole(["ADMIN"]), updateVisit)
-//   .delete(verifyRole(["ADMIN"]), deleteVisit);
+// router.route("/:patientChartId").get(verifyUserId, getPatientVisits);
+// //   .patch(verifyRole(["ADMIN"]), updateVisit)
+// //   .delete(verifyRole(["ADMIN"]), deleteVisit);
 
-export default router;
+// export default router;

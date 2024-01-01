@@ -2,8 +2,8 @@
 CREATE TABLE `Configuration` (
     `id` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `logo` VARCHAR(191) NOT NULL,
-    `loginBg` VARCHAR(191) NOT NULL,
+    `logo` TEXT NOT NULL,
+    `loginBg` TEXT NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -22,16 +22,38 @@ CREATE TABLE `Role` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `ClinicalDepartment` (
+    `id` VARCHAR(191) NOT NULL,
+    `clinicalDeptName` VARCHAR(191) NOT NULL,
+    `clinicalDeptHead` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `ClinicalDepartment_clinicalDeptName_key`(`clinicalDeptName`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `User` (
     `id` VARCHAR(191) NOT NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `username` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `roleId` VARCHAR(191) NULL,
+    `clinicalDepartmentId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `User_username_key`(`username`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `UserVerification` (
+    `id` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -70,20 +92,17 @@ CREATE TABLE `HealthcareProfessionalInfo` (
 
 -- CreateTable
 CREATE TABLE `Patient` (
-    `patientId` VARCHAR(191) NOT NULL,
-    `patientProfileId` VARCHAR(191) NOT NULL,
-    `patientChartId` VARCHAR(191) NULL,
+    `id` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Patient_patientProfileId_key`(`patientProfileId`),
-    UNIQUE INDEX `Patient_patientChartId_key`(`patientChartId`),
-    PRIMARY KEY (`patientId`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `PatientProfile` (
     `id` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
     `fname` VARCHAR(191) NOT NULL,
     `mname` VARCHAR(191) NOT NULL,
     `lname` VARCHAR(191) NOT NULL,
@@ -92,71 +111,75 @@ CREATE TABLE `PatientProfile` (
     `gender` VARCHAR(191) NOT NULL,
     `bdate` DATETIME(3) NOT NULL,
     `bplace` VARCHAR(191) NOT NULL,
-    `civilStatus` VARCHAR(191) NOT NULL,
-    `occupation` VARCHAR(191) NOT NULL,
+    `civilStatus` ENUM('SINGLE', 'MARRIED', 'WIDOWED', 'SEPARATED') NOT NULL,
+    `occupation` VARCHAR(191) NULL,
     `contactNumber` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NULL,
+    `email` VARCHAR(191) NOT NULL,
     `address` VARCHAR(191) NOT NULL,
-    `alertMedication` VARCHAR(191) NOT NULL,
-    `allergies` VARCHAR(191) NOT NULL,
-    `isSmoking` BOOLEAN NOT NULL,
-    `isCovidVaccinated` BOOLEAN NOT NULL,
-    `isDengvaxiaVaccinated` BOOLEAN NOT NULL,
+    `alertMedication` VARCHAR(191) NULL,
+    `allergies` VARCHAR(191) NULL,
+    `isSmoking` BOOLEAN NOT NULL DEFAULT false,
+    `isCovidVaccinated` BOOLEAN NOT NULL DEFAULT false,
+    `isDengvaxiaVaccinated` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `PatientProfile_patientId_key`(`patientId`),
+    UNIQUE INDEX `PatientProfile_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `PatientChart` (
     `id` VARCHAR(191) NOT NULL,
+    `patientId` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `PatientChart_patientId_key`(`patientId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `OpdRecord` (
+CREATE TABLE `ServiceDepartment` (
     `id` VARCHAR(191) NOT NULL,
-    `patientChartId` VARCHAR(191) NULL,
+    `serviceDeptName` VARCHAR(191) NOT NULL,
+    `serviceDeptHead` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `ServiceDepartment_serviceDeptName_key`(`serviceDeptName`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Visit` (
     `id` VARCHAR(191) NOT NULL,
-    `opdRecordId` VARCHAR(191) NULL,
+    `patientChartId` VARCHAR(191) NULL,
     `accompaniedBy` VARCHAR(191) NULL,
     `chiefComplaint` VARCHAR(191) NOT NULL,
-    `hpi` VARCHAR(191) NULL,
-    `vitalsId` VARCHAR(191) NOT NULL,
-    `diagnosisId` VARCHAR(191) NOT NULL,
-    `prescription` VARCHAR(191) NOT NULL,
+    `hpi` VARCHAR(191) NOT NULL,
+    `serviceDepartmentId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `vitalsId` VARCHAR(191) NULL,
 
-    UNIQUE INDEX `Visit_vitalsId_key`(`vitalsId`),
-    UNIQUE INDEX `Visit_diagnosisId_key`(`diagnosisId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Diagnosis` (
+CREATE TABLE `Evaluation` (
     `id` VARCHAR(191) NOT NULL,
     `physicianId` VARCHAR(191) NULL,
+    `visitId` VARCHAR(191) NOT NULL,
     `physicalExamination` VARCHAR(191) NOT NULL,
     `diagnosis` VARCHAR(191) NOT NULL,
     `treatment` VARCHAR(191) NOT NULL,
+    `prescription` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `initialCheckUpId` VARCHAR(191) NULL,
-    `followUpCheckUpId` VARCHAR(191) NULL,
 
+    UNIQUE INDEX `Evaluation_visitId_key`(`visitId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -164,6 +187,7 @@ CREATE TABLE `Diagnosis` (
 CREATE TABLE `Vitals` (
     `id` VARCHAR(191) NOT NULL,
     `nurseId` VARCHAR(191) NOT NULL,
+    `visitId` VARCHAR(191) NOT NULL,
     `heightInCm` INTEGER NOT NULL,
     `weightInKl` INTEGER NOT NULL,
     `bloodPressure` INTEGER NOT NULL,
@@ -174,11 +198,15 @@ CREATE TABLE `Vitals` (
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `Vitals_visitId_key`(`visitId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `User` ADD CONSTRAINT `User_roleId_fkey` FOREIGN KEY (`roleId`) REFERENCES `Role`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `User` ADD CONSTRAINT `User_clinicalDepartmentId_fkey` FOREIGN KEY (`clinicalDepartmentId`) REFERENCES `ClinicalDepartment`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `UserProfile` ADD CONSTRAINT `UserProfile_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -187,25 +215,25 @@ ALTER TABLE `UserProfile` ADD CONSTRAINT `UserProfile_userId_fkey` FOREIGN KEY (
 ALTER TABLE `UserProfile` ADD CONSTRAINT `UserProfile_healthcareProfessionalId_fkey` FOREIGN KEY (`healthcareProfessionalId`) REFERENCES `HealthcareProfessionalInfo`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Patient` ADD CONSTRAINT `Patient_patientProfileId_fkey` FOREIGN KEY (`patientProfileId`) REFERENCES `PatientProfile`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `PatientProfile` ADD CONSTRAINT `PatientProfile_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `Patient`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Patient` ADD CONSTRAINT `Patient_patientChartId_fkey` FOREIGN KEY (`patientChartId`) REFERENCES `PatientChart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `PatientChart` ADD CONSTRAINT `PatientChart_patientId_fkey` FOREIGN KEY (`patientId`) REFERENCES `Patient`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `OpdRecord` ADD CONSTRAINT `OpdRecord_patientChartId_fkey` FOREIGN KEY (`patientChartId`) REFERENCES `PatientChart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Visit` ADD CONSTRAINT `Visit_patientChartId_fkey` FOREIGN KEY (`patientChartId`) REFERENCES `PatientChart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Visit` ADD CONSTRAINT `Visit_opdRecordId_fkey` FOREIGN KEY (`opdRecordId`) REFERENCES `OpdRecord`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Visit` ADD CONSTRAINT `Visit_serviceDepartmentId_fkey` FOREIGN KEY (`serviceDepartmentId`) REFERENCES `ServiceDepartment`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Visit` ADD CONSTRAINT `Visit_vitalsId_fkey` FOREIGN KEY (`vitalsId`) REFERENCES `Vitals`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Evaluation` ADD CONSTRAINT `Evaluation_physicianId_fkey` FOREIGN KEY (`physicianId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Visit` ADD CONSTRAINT `Visit_diagnosisId_fkey` FOREIGN KEY (`diagnosisId`) REFERENCES `Diagnosis`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Evaluation` ADD CONSTRAINT `Evaluation_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Diagnosis` ADD CONSTRAINT `Diagnosis_physicianId_fkey` FOREIGN KEY (`physicianId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_nurseId_fkey` FOREIGN KEY (`nurseId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_nurseId_fkey` FOREIGN KEY (`nurseId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
