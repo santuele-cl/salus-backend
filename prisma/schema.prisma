@@ -115,7 +115,7 @@ model PatientProfile {
   mname                 String
   lname                 String
   nameSuffix            String?
-  age                   String
+  age                   Int
   gender                String // Male, Female
   bdate                 DateTime
   bplace                String

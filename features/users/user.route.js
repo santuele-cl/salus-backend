@@ -17,7 +17,7 @@ const router = Router();
 router.use(verifyJWT);
 router
   .route("/")
-  .get(verifyRole(["admin"]), getUsers)
+  .get(getUsers)
   .post(verifyRole(["ADMIN"]), createNewUser);
 
 router

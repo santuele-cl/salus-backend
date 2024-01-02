@@ -42,9 +42,9 @@ const getUserById = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User not found." });
   }
 
-  const filteredUser = exclude(user, ["password"]);
+  // const filteredUser = exclude(user, ["password"]);
 
-  res.status(200).json(filteredUser);
+  res.status(200).json(user);
 });
 
 // @desc   POST /users        Private

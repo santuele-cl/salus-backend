@@ -171,7 +171,7 @@ const main = async () => {
           fname: "test",
           mname: "test",
           lname: "test",
-          age: "test",
+          age: 18,
           gender: "test",
           bdate: "2023-12-27T10:48:22Z",
           bplace: "test",

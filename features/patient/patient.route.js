@@ -15,15 +15,14 @@ import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
 const router = Router();
 
 router.use(verifyJWT);
-router
-  .route("/")
-  .get(verifyRole(["admin"]), getPatients)
-  .post(verifyRole(["ADMIN"]), addPatient);
+router.use(verifyRole(["NURSE", "PHYSICIAN"]));
+
+router.route("/").get(getPatients).post(addPatient);
 
 router
   .route("/:patientId")
-  .get(verifyUserId, getPatientById)
-  .patch(verifyRole(["ADMIN"]), updatePatient)
-  .delete(verifyRole(["ADMIN"]), deletePatient);
+  .get(getPatientById)
+  .patch(updatePatient)
+  .delete(deletePatient);
 
 export default router;
