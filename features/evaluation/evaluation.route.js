@@ -14,7 +14,7 @@ import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
 const router = Router();
 
 router.use(verifyJWT);
-router.use(verifyRole(["NURSE", "PHYSICIAN"]));
+router.use(verifyRole(["PHYSICIAN"]));
 
 router.route("/").get(getAllEvaluations).post(addEvaluation);
 

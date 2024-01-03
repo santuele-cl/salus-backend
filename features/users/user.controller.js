@@ -96,7 +96,8 @@ const createNewUser = asyncHandler(async (req, res) => {
 
 // @desc   PATCH /users/:id   Private
 const updateUser = asyncHandler(async (req, res) => {
-  const { id, username } = req.body;
+  const { updatedData } = req.body;
+  const { userId: id } = req.params;
 
   // @func  Check if user exist
   const user = await prismaInstance.user.findUnique({ where: { id } });
@@ -106,7 +107,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
   const updatedUser = await prismaInstance.user.update({
     where: { id: id },
-    data: { username: username },
+    data: { ...updatedData },
   });
 
   res.json({ message: `${updatedUser.username} updated.` });

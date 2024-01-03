@@ -31,9 +31,8 @@ const login = asyncHandler(async (req, res) => {
     },
   });
 
-  console.log("user", user);
   if (!user || !user.isActive) {
-    return res.status(401).json({ message: "Incorrect Username or Password." });
+    return res.status(401).json({ message: "Invalid credentials." });
   }
 
   // @func  Compare and validate password
