@@ -8,10 +8,11 @@ import prismaInstance from "../../prisma/prismaClient.js";
 const required = [
   "heightInCm",
   "weightInKl",
-  "bloodPressure",
+  "bpSystolic",
+  "bpDiastolic",
   "pulseRate",
   "respiratoryRate",
-  "bodyTemperatureInCelsius",
+  "bodyTempInCelsius",
   "oxygenSaturation",
 ];
 
@@ -52,6 +53,20 @@ const getVital = asyncHandler(async (req, res) => {
 
   const vitals = await prismaInstance.vitals.findUnique({
     where: { id: vitalsId },
+    include: {
+      nurse: {
+        select: {
+          userProfile: {
+            select: {
+              fname: true,
+              lname: true,
+              email: true,
+              contactNumber: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!vitals) {
@@ -76,7 +91,7 @@ const getAllVitals = asyncHandler(async (req, res) => {
 const addVitals = asyncHandler(async (req, res) => {
   const { visitId, vitalsData } = req.body;
   const requestingId = req.userId;
-  console.log(vitalsData);
+
   if (!vitalsData || !visitId) {
     return res.status(400).json({
       message: "Vitals info is missing.",

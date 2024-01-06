@@ -49,6 +49,11 @@ const getEvaluation = asyncHandler(async (req, res) => {
 
   const evaluation = await prismaInstance.evaluation.findUnique({
     where: { id: evaluationId },
+    include: {
+      physician: {
+        select: { userProfile: { select: { fname: true, lname: true } } },
+      },
+    },
   });
 
   if (!evaluation) {

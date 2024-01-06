@@ -121,7 +121,7 @@ model PatientProfile {
   bplace                String
   civilStatus           CivilStatus // Single, Married, Widowed, Separated
   occupation            String?
-  contactNumber         String
+  contactNumber         String?
   email                 String      @unique
   address               String
   alertMedication       String?
@@ -164,7 +164,7 @@ model Visit {
 
   accompaniedBy  String?
   chiefComplaint String
-  hpi            String
+  hpi            String  @db.Text
 
   serviceDepartment   ServiceDepartment? @relation(fields: [serviceDepartmentId], references: [id])
   serviceDepartmentId String?
@@ -206,16 +206,16 @@ model Vitals {
   visit   Visit  @relation(fields: [visitId], references: [id], onDelete: Cascade)
   visitId String @unique
 
-  heightInCm               Int
-  weightInKl               Int
-  bloodPressure            String
-  pulseRate                String
-  respiratoryRate          String
-  bodyTemperatureInCelsius Int
-  oxygenSaturation         String
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
-  // Visit                    Visit[]
+  heightInCm        Int
+  weightInKl        Int
+  bpSystolic        Int
+  bpDiastolic       Int
+  pulseRate         Int
+  respiratoryRate   Int
+  bodyTempInCelsius Int
+  oxygenSaturation  Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 // model Prescription {

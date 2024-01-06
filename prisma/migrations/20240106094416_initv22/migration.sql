@@ -107,13 +107,13 @@ CREATE TABLE `PatientProfile` (
     `mname` VARCHAR(191) NOT NULL,
     `lname` VARCHAR(191) NOT NULL,
     `nameSuffix` VARCHAR(191) NULL,
-    `age` VARCHAR(191) NOT NULL,
+    `age` INTEGER NOT NULL,
     `gender` VARCHAR(191) NOT NULL,
     `bdate` DATETIME(3) NOT NULL,
     `bplace` VARCHAR(191) NOT NULL,
     `civilStatus` ENUM('SINGLE', 'MARRIED', 'WIDOWED', 'SEPARATED') NOT NULL,
     `occupation` VARCHAR(191) NULL,
-    `contactNumber` VARCHAR(191) NOT NULL,
+    `contactNumber` VARCHAR(191) NULL,
     `email` VARCHAR(191) NOT NULL,
     `address` VARCHAR(191) NOT NULL,
     `alertMedication` VARCHAR(191) NULL,
@@ -158,11 +158,10 @@ CREATE TABLE `Visit` (
     `patientChartId` VARCHAR(191) NULL,
     `accompaniedBy` VARCHAR(191) NULL,
     `chiefComplaint` VARCHAR(191) NOT NULL,
-    `hpi` VARCHAR(191) NOT NULL,
+    `hpi` TEXT NOT NULL,
     `serviceDepartmentId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
-    `vitalsId` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -190,11 +189,12 @@ CREATE TABLE `Vitals` (
     `visitId` VARCHAR(191) NOT NULL,
     `heightInCm` INTEGER NOT NULL,
     `weightInKl` INTEGER NOT NULL,
-    `bloodPressure` INTEGER NOT NULL,
-    `pulseRate` VARCHAR(191) NOT NULL,
-    `respiratoryRate` VARCHAR(191) NOT NULL,
-    `bodyTemperatureInCelsius` INTEGER NOT NULL,
-    `oxygenSaturation` VARCHAR(191) NOT NULL,
+    `bpSystolic` INTEGER NOT NULL,
+    `bpDiastolic` INTEGER NOT NULL,
+    `pulseRate` INTEGER NOT NULL,
+    `respiratoryRate` INTEGER NOT NULL,
+    `bodyTempInCelsius` INTEGER NOT NULL,
+    `oxygenSaturation` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -230,10 +230,10 @@ ALTER TABLE `Visit` ADD CONSTRAINT `Visit_serviceDepartmentId_fkey` FOREIGN KEY 
 ALTER TABLE `Evaluation` ADD CONSTRAINT `Evaluation_physicianId_fkey` FOREIGN KEY (`physicianId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Evaluation` ADD CONSTRAINT `Evaluation_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Evaluation` ADD CONSTRAINT `Evaluation_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_nurseId_fkey` FOREIGN KEY (`nurseId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
