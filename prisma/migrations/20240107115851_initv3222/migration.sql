@@ -173,8 +173,7 @@ CREATE TABLE `Evaluation` (
     `visitId` VARCHAR(191) NOT NULL,
     `physicalExamination` VARCHAR(191) NOT NULL,
     `diagnosis` VARCHAR(191) NOT NULL,
-    `treatment` VARCHAR(191) NOT NULL,
-    `prescription` VARCHAR(191) NOT NULL,
+    `doctorsNote` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -199,6 +198,59 @@ CREATE TABLE `Vitals` (
     `updatedAt` DATETIME(3) NOT NULL,
 
     UNIQUE INDEX `Vitals_visitId_key`(`visitId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Medication` (
+    `id` VARCHAR(191) NOT NULL,
+    `drugName` VARCHAR(191) NOT NULL,
+    `strength` VARCHAR(191) NOT NULL,
+    `form` VARCHAR(191) NOT NULL,
+    `dosage` INTEGER NOT NULL,
+    `frequency` VARCHAR(191) NOT NULL,
+    `duration` INTEGER NOT NULL,
+    `direction` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `evaluationId` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `LabOrders` (
+    `id` VARCHAR(191) NOT NULL,
+    `requestingPhysicianId` VARCHAR(191) NULL,
+    `clinicName` VARCHAR(191) NULL,
+    `labProcedureId` VARCHAR(191) NULL,
+    `result` TEXT NULL,
+    `date` DATETIME(3) NULL,
+    `patientChartId` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `LabProcedure` (
+    `id` VARCHAR(191) NOT NULL,
+    `procedureName` VARCHAR(191) NOT NULL,
+    `labProcedureCategoryId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `LabProcedureCategory` (
+    `id` VARCHAR(191) NOT NULL,
+    `categoryName` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -237,3 +289,18 @@ ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_nurseId_fkey` FOREIGN KEY (`nurseId`
 
 -- AddForeignKey
 ALTER TABLE `Vitals` ADD CONSTRAINT `Vitals_visitId_fkey` FOREIGN KEY (`visitId`) REFERENCES `Visit`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Medication` ADD CONSTRAINT `Medication_evaluationId_fkey` FOREIGN KEY (`evaluationId`) REFERENCES `Evaluation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `LabOrders` ADD CONSTRAINT `LabOrders_requestingPhysicianId_fkey` FOREIGN KEY (`requestingPhysicianId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `LabOrders` ADD CONSTRAINT `LabOrders_labProcedureId_fkey` FOREIGN KEY (`labProcedureId`) REFERENCES `LabProcedure`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `LabOrders` ADD CONSTRAINT `LabOrders_patientChartId_fkey` FOREIGN KEY (`patientChartId`) REFERENCES `PatientChart`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `LabProcedure` ADD CONSTRAINT `LabProcedure_labProcedureCategoryId_fkey` FOREIGN KEY (`labProcedureCategoryId`) REFERENCES `LabProcedureCategory`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

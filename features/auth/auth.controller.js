@@ -77,7 +77,7 @@ const login = asyncHandler(async (req, res) => {
 // @access  Public
 const refresh = (req, res) => {
   const { cookies } = req;
-
+  console.log(cookies);
   if (!cookies?.refreshToken) {
     return res.status(401).json({ message: "Unauthorized." });
   }
@@ -86,16 +86,22 @@ const refresh = (req, res) => {
     cookies.refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
     asyncHandler(async (err, decoded) => {
-      if (err)
+      if (err) {
         return res
           .status(401)
           .json({ message: `Unauthorized. ${err?.message}` });
+      }
+      console.log(decoded);
 
       // @func    Validate user
       const user = await prismaInstance.user.findUnique({
         where: { username: decoded.username },
         select: { id: true, username: true, role: true },
       });
+
+      if (!user) {
+        return res.status(401).json({ message: `Unauthorized. USR 404` });
+      }
       // @func  Create tokens
       const accessToken = jwt.sign(
         {

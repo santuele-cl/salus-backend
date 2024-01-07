@@ -202,8 +202,34 @@ const main = async () => {
           physician: { connect: { id: "UJFJ802JQ" } },
           physicalExamination: "test",
           diagnosis: "Otitis Media",
-          treatment: "",
-          prescription: "Co-amoxiclav 3x a day for 7 days.",
+          doctorsNote: "Empty",
+          // prescription: "Co-amoxiclav 3x a day for 7 days.",
+          medication: {
+            createMany: {
+              data: [
+                {
+                  id: "MED23293FBA26B2",
+                  drugName: "Ibuprofen",
+                  strength: "600 mg",
+                  form: "tablet",
+                  dosage: 1,
+                  frequency: "3x daily",
+                  duration: 7,
+                  direction: "Every after meal",
+                },
+                {
+                  id: "MED4323AFBA26B2",
+                  drugName: "Ibuprofen",
+                  strength: "600 mg",
+                  form: "tablet",
+                  dosage: 1,
+                  frequency: "3x daily",
+                  duration: 7,
+                  direction: "Every after meal",
+                },
+              ],
+            },
+          },
         },
       },
       vitals: {
@@ -220,6 +246,127 @@ const main = async () => {
           oxygenSaturation: 95,
         },
       },
+    },
+  });
+
+  const labcategories = await prismaInstance.labProcedureCategory.createMany({
+    data: [
+      { id: "LPC1001", categoryName: "hematology" },
+      { id: "LPC1002", categoryName: "blood bank" },
+      { id: "LPC1003", categoryName: "clinical miscroscopy" },
+      { id: "LPC1004", categoryName: "blood chemistry" },
+      { id: "LPC1005", categoryName: "serology" },
+      { id: "LPC1006", categoryName: "hispathology" },
+      { id: "LPC1007", categoryName: "bacteriology" },
+    ],
+  });
+
+  const hematology = [
+    "CBC",
+    "platelet count",
+    "RBC/WBC count",
+    "Hgb Hct Only",
+    "WBC difference count only",
+    "differential count",
+    "peripheral smear",
+    "ct bt",
+    "toxic granulation",
+    "ESR",
+    "Malarial Smear",
+  ];
+  const bloodbank = ["ABO typing", "Rh typing", "Cross matching"];
+  const clinicmiscrocopy = [
+    "Urinalysis",
+    "Fecalysis",
+    "Pregnancy Test",
+    "Sperm Analysis",
+  ];
+  const bloodchem = [
+    "FBS",
+    "RBS/HGT",
+    "OGTT",
+    "OCTT",
+    "BUN",
+    "Createnine",
+    "Uric Acid",
+    "Cholesterol",
+    "Triglycendes",
+    "HDL LDL",
+    "ALT/SGPT",
+    "AST/SGOT",
+    "Sodium",
+    "Potassium",
+    "Chlorine",
+    "Calcium",
+    "Magnesium",
+    "Alk. Phospate",
+    "Acid Phospate",
+    "CPK - Total",
+    "CPK-MB",
+  ];
+
+  const serology = [
+    "RPR / VDRL",
+    "HBs Ag",
+    "Typhi Dot",
+    "PAP Smear",
+    "FNAB",
+    "Biopsy",
+  ];
+  const hispathology = ["PAP Smear", "FNAB", "Biopsy"];
+  const bacteriology = [
+    "AFB Stain",
+    "Gram Stain",
+    "KOH",
+    "Culture & Sensitivity",
+  ];
+  const labprocedures = await prismaInstance.labProcedure.createMany({
+    data: [
+      ...hematology.map((proc, i) => ({
+        id: `LPHM100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1001",
+      })),
+      ...bloodbank.map((proc, i) => ({
+        id: `LPBB100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1002",
+      })),
+      ...clinicmiscrocopy.map((proc, i) => ({
+        id: `LPCM100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1003",
+      })),
+      ...bloodchem.map((proc, i) => ({
+        id: `LPBC100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1003",
+      })),
+      ...serology.map((proc, i) => ({
+        id: `LPSR100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1004",
+      })),
+      ...hispathology.map((proc, i) => ({
+        id: `LPHP100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1005",
+      })),
+      ...bacteriology.map((proc, i) => ({
+        id: `LPBCT100${i + 1}`,
+        procedureName: proc,
+        labProcedureCategoryId: "LPC1006",
+      })),
+    ],
+  });
+
+  const laborderss = await prismaInstance.labOrders.create({
+    data: {
+      id: "LO74C24726E4E3E607",
+      patientChartId: "PPC38DA208FBA",
+      requestingPhysicianId: "UJFJ802JQ",
+      clinicName: "TPDH Clinic",
+      labProcedureId: "LPCM1001",
     },
   });
 };

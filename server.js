@@ -21,6 +21,8 @@ import evaluationRoute from "./features/evaluation/evaluation.route.js";
 import configRoute from "./features/config/config.route.js";
 import vitalsRoute from "./features/vitals/vitals.route.js";
 import testRoute from "./features/test/test.route.js";
+import labOrderRoute from "./features/laborders/lab.route.js";
+import categoriesRoute from "./features/labprocedure/labProcedureCategory.route.js";
 
 // @desc- middleware import
 import { logger } from "./middlewares/logger.middleware.js";
@@ -54,6 +56,8 @@ app.use("/patients", patientRoute);
 app.use("/visits", visitRoute);
 app.use("/vitals", vitalsRoute);
 app.use("/evaluations", evaluationRoute);
+app.use("/laborders", labOrderRoute);
+app.use("/procedurecategories", categoriesRoute);
 // app.use("/charts", chartRoute);
 app.use("/config", configRoute);
 

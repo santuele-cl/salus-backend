@@ -73,6 +73,7 @@ const getVisitsByPatientChartId = asyncHandler(async (req, res) => {
               },
             },
           },
+          medication: true,
         },
       },
     },

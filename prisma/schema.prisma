@@ -49,6 +49,7 @@ model User {
 
   vitalsChecked Vitals[]
   evaluation    Evaluation[]
+  LabOrders     LabOrders[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -139,7 +140,8 @@ model PatientChart {
   patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
   patientId String  @unique
 
-  visits Visit[]
+  visits    Visit[]
+  labOrders LabOrders[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,8 +192,8 @@ model Evaluation {
 
   physicalExamination String
   diagnosis           String
-  treatment           String
-  prescription        String
+  doctorsNote         String?
+  medication          Medication[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -218,14 +220,57 @@ model Vitals {
   updatedAt         DateTime @updatedAt
 }
 
-// model Prescription {
-//   id        String   @id @default(uuid())
-//   medicine
-//   dosage    String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   Visit     Visit?
-// }
+model Medication {
+  id           String      @id @default(uuid())
+  drugName     String
+  strength     String
+  form         String
+  dosage       Int
+  frequency    String
+  duration     Int
+  direction    String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  Evaluation   Evaluation? @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluationId String?
+}
+
+model LabOrders {
+  id String @id @default(uuid())
+
+  requestingPhysician   User?         @relation(fields: [requestingPhysicianId], references: [id])
+  requestingPhysicianId String?
+  clinicName            String?
+  LabProcedure          LabProcedure? @relation(fields: [labProcedureId], references: [id])
+  labProcedureId        String?
+  result                String?       @db.Text
+  date                  DateTime?
+  patientChart          PatientChart? @relation(fields: [patientChartId], references: [id], onDelete: Cascade)
+  patientChartId        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabProcedure {
+  id                     String                @id @default(uuid())
+  procedureName          String
+  LabProcedureCategory   LabProcedureCategory? @relation(fields: [labProcedureCategoryId], references: [id])
+  labProcedureCategoryId String?
+  labOrders              LabOrders[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabProcedureCategory {
+  id           String         @id @default(uuid())
+  categoryName String         @unique
+  labProcedure LabProcedure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 // enum DosageForm {
 //   TABLET

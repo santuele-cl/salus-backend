@@ -5,11 +5,16 @@ const nanoid = customAlphabet("1234567890abcdef", 16);
 
 import prismaInstance from "../../prisma/prismaClient.js";
 
-const required = [
-  "physicalExamination",
-  "diagnosis",
-  "treatment",
-  "prescription",
+const requiredEvalData = ["physicalExamination", "diagnosis"];
+
+const requiredMedicationData = [
+  "drugName",
+  "strength",
+  "form",
+  "dosage",
+  "frequency",
+  "duration",
+  "direction",
 ];
 
 // @desc   GET /users         Private
@@ -76,12 +81,19 @@ const getAllEvaluations = asyncHandler(async (req, res) => {
 
 // @desc   POST /users        Private
 const addEvaluation = asyncHandler(async (req, res) => {
-  const { visitId, evaluationData } = req.body;
+  const { visitId, evaluationData, medicationData } = req.body;
+  console.log("req.body addEval", req.body);
+  // console.log(medicationData);
   const requestingId = req.userId;
 
-  if (!evaluationData || !visitId) {
+  if (
+    !evaluationData ||
+    !visitId ||
+    !medicationData ||
+    !medicationData.length > 0
+  ) {
     return res.status(400).json({
-      message: "No evaluation data or visit ID.",
+      message: "No evaluation data, medication and/or visit ID.",
     });
   }
 
@@ -97,7 +109,7 @@ const addEvaluation = asyncHandler(async (req, res) => {
 
   // @desc Validate visit data input
   const missingField = [];
-  const validateInput = required.map((field) => {
+  const validateEvalInput = requiredEvalData.map((field) => {
     if (Object.hasOwn(evaluationData, field)) {
       return true;
     } else {
@@ -106,7 +118,24 @@ const addEvaluation = asyncHandler(async (req, res) => {
     }
   });
 
-  const isInputValid = validateInput.every((bool) => bool === true);
+  const validateMedicationInput = medicationData.map((data) =>
+    requiredMedicationData.map((field) => {
+      if (Object.hasOwn(data, field)) {
+        return true;
+      } else {
+        missingField.push(field);
+        return false;
+      }
+    })
+  );
+
+  console.log("validateEvalInput", validateEvalInput);
+  console.log("validateMedicationInput", validateMedicationInput);
+  const isInputValid =
+    validateEvalInput.every((bool) => bool === true) &&
+    validateMedicationInput.map((medData) =>
+      medData.every((bool) => bool === true)
+    );
 
   if (!isInputValid) {
     return res.status(400).json({
@@ -116,12 +145,24 @@ const addEvaluation = asyncHandler(async (req, res) => {
     });
   }
 
+  const processMedicationData = medicationData.map((med) => ({
+    id: `MED${nanoid().toUpperCase()}`,
+    ...med,
+  }));
+  console.log("processMedicationData", processMedicationData);
+
   const evaluation = await prismaInstance.evaluation.create({
     data: {
       id: `EV${nanoid().toUpperCase()}`,
       visit: { connect: { id: visitId } },
       physician: { connect: { id: requestingId ? requestingId : "UJFJ802JQ" } },
-      ...evaluationData,
+
+      medication: {
+        createMany: { data: [...processMedicationData] },
+      },
+      physicalExamination: evaluationData.physicalExamination,
+      diagnosis: evaluationData.diagnosis,
+      doctorsNote: evaluationData.doctorsNote,
     },
   });
 
