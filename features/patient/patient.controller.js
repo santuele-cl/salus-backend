@@ -114,7 +114,11 @@ const addPatient = asyncHandler(async (req, res) => {
   });
 
   if (patient) {
-    res.status(201).json({ message: "Patient data inputted successfully." });
+    res
+      .status(201)
+      .json({
+        message: `Patient with ID ${profile?.id} successfully created.`,
+      });
   } else {
     res
       .status(400)

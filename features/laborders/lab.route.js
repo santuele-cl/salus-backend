@@ -15,11 +15,16 @@ import verifyUserId from "../../middlewares/verifyUserId.middleware.js";
 
 const router = Router();
 
-// router.use(verifyJWT);
-// router.use(verifyRole(["PHYSICIAN"]));
+router.use(verifyJWT);
 
-router.route("/").get(getAllLabOrders).post(createLabOrder);
-router.route("/:labOrderId").get(getLabOrderById).patch(updateLabOrder);
+router
+  .route("/")
+  .get(verifyRole(["PHYSICIAN", "NURSE"]), getAllLabOrders)
+  .post(verifyRole(["PHYSICIAN"]), createLabOrder);
+router
+  .route("/:labOrderId")
+  .get(verifyRole(["PHYSICIAN", "NURSE"]), getLabOrderById)
+  .patch(verifyRole(["PHYSICIAN", "NURSE"]), updateLabOrder);
 // .delete(deleteLabOrder);
 
 router.route("/pc/:patientChartId").get(getLabOrdersByPatientChartId);
