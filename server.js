@@ -40,7 +40,14 @@ const PORT = process.env.PORT || 8000;
 
 // @middlewares
 app.use(helmet());
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "https://playful-empanada-24d002.netlify.app",
+    credentials: true,
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(logger);
 app.use(express.json());
 app.use(cookieParser());
