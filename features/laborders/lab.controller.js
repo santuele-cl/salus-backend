@@ -126,7 +126,7 @@ const createLabOrder = asyncHandler(async (req, res) => {
         connect: { id: requestingId ? requestingId : "UJFJ802JQ" },
       },
       clinicName: "",
-      LabProcedure: { connect: { id: labProcedureId } },
+      labProcedure: { connect: { id: labProcedureId } },
       ...therest,
     },
   });
