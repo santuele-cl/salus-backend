@@ -40,7 +40,7 @@ const getLabOrdersByPatientChartId = asyncHandler(async (req, res) => {
   }
 
   const laborders = await prismaInstance.labOrders.findMany({
-    where: { patientChartId },
+    where: { id: patientChartId },
     include: {
       labProcedure: {
         select: {

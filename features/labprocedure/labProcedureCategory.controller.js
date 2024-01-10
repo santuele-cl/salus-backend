@@ -7,15 +7,14 @@ import { nanoid } from "nanoid";
 // @route   GET /roles
 // @access  Private
 const getCategories = asyncHandler(async (req, res) => {
-  // const { skip, take } = req.query;
-  const categories = await prismaInstance.labProcedureCategory.findMany({
+  const cat = await prismaInstance.labProcedureCategory.findMany({
     select: {
       categoryName: true,
-      labProcedure: { select: { id: true, procedureName: true } },
+      labProcedure: { select: { id: true, procedureName } },
     },
   });
 
-  if (!categories?.length) {
+  if (!cat?.length) {
     return res.status(400).json({ message: "No categories found." });
   }
 
