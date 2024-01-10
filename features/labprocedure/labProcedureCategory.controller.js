@@ -10,7 +10,7 @@ const getCategories = asyncHandler(async (req, res) => {
   const cat = await prismaInstance.labProcedureCategory.findMany({
     select: {
       categoryName: true,
-      labProcedure: { select: { id: true, procedureName } },
+      labProcedure: { select: { id: true, procedureName: true } },
     },
   });
 
@@ -18,7 +18,7 @@ const getCategories = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "No categories found." });
   }
 
-  res.status(200).json(categories);
+  res.status(200).json(cat);
 });
 
 // @desc    Create new role
