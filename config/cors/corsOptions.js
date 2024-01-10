@@ -1,6 +1,7 @@
 const whiteList = [
   "https://playful-empanada-24d002.netlify.app",
   "http://localhost:5173",
+  "http://localhost:4173",
 ];
 
 const corsOptions = {

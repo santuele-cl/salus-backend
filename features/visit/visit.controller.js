@@ -14,7 +14,7 @@ function exclude(item, keysToRemove) {
 const required = ["chiefComplaint", "hpi", "serviceDepartmentId"];
 
 const getAllVisits = asyncHandler(async (req, res) => {
-  const visits = await prismaInstance.visit.findMany({});
+  const visits = await prismaInstance.visit.findMany();
 
   if (!visits?.length) {
     return res.status(400).json({ message: "No visits found." });
