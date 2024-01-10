@@ -40,7 +40,7 @@ const getLabOrdersByPatientChartId = asyncHandler(async (req, res) => {
   }
 
   const laborders = await prismaInstance.labOrders.findMany({
-    where: { id: patientChartId },
+    where: { patientChartId },
     include: {
       labProcedure: {
         select: {
@@ -70,7 +70,7 @@ const getLabOrdersByPatientChartId = asyncHandler(async (req, res) => {
   });
 
   if (!laborders?.length) {
-    return res.status(400).json({ message: "No visits found." });
+    return res.status(400).json({ message: "No laboratory orders found." });
   }
 
   res.status(200).json(laborders);
